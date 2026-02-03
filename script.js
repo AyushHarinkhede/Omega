@@ -259,29 +259,276 @@
     
     // --- New Functions ---
 
-    function handleLogin(event) {
-        event.preventDefault();
-        showToast('Logged in successfully!', 'success');
+// ==================== SOCIAL LOGIN FUNCTIONALITY ====================
+function socialLogin(provider) {
+    // Simulate social login process
+    showToast(`Connecting to ${provider.charAt(0).toUpperCase() + provider.slice(1)}...`, 'info');
+    
+    setTimeout(() => {
+        // Simulate successful login
+        const userData = {
+            name: provider === 'google' ? 'John Doe' : 
+                  provider === 'facebook' ? 'Jane Smith' :
+                  provider === 'apple' ? 'Apple User' : 'Microsoft User',
+            email: `user@${provider}.com`,
+            provider: provider
+        };
         
-        // Hide Login/Signup buttons and show profile icon
-        document.querySelector('.nav-buttons').style.display = 'none';
-        document.getElementById('user-profile-icon').style.display = 'flex';
+        // Update UI with user data
+        document.querySelector('[data-key="profileName"]').textContent = userData.name;
+        document.getElementById('profileEmail').textContent = userData.email;
         
-        // Show admin link for demo purposes (in real app, check user role)
-        document.getElementById('adminLink').style.display = 'block';
+        // Show success message
+        showToast(`Successfully logged in with ${provider.charAt(0).toUpperCase() + provider.slice(1)}!`, 'success');
         
-        // Set user initials
-        const fullName = document.querySelector('[data-key="profileName"]').textContent;
-        const nameParts = fullName.split(' ');
-        const initials = nameParts[0].charAt(0) + (nameParts.length > 1 ? nameParts[nameParts.length - 1].charAt(0) : '');
-        document.getElementById('user-initials').textContent = initials.toUpperCase();
-        
-        // Show document upload section
-        document.getElementById('document-upload-section').style.display = 'block';
-        
+        // Close modals and show logged-in state
         closeModal('loginModal');
         closeModal('signupModal');
+        handleLogin({ preventDefault: () => {} });
+        
+        // Store login method
+        localStorage.setItem('loginMethod', provider);
+        localStorage.setItem('userData', JSON.stringify(userData));
+    }, 1500);
+}
+
+// ==================== ENHANCED PROFILE FUNCTIONALITY ====================
+function updateProfileDisplay() {
+    // Get user data from localStorage or use defaults
+    const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+    const profileData = JSON.parse(localStorage.getItem('profileData') || '{}');
+    
+    // Update profile display with all available data
+    updateProfileField('profile-name-display', profileData.fullName || userData.name || 'Ayush Harinkhere');
+    updateProfileField('profile-email-display', profileData.email || userData.email || 'ayushharinkhere2005@email.com');
+    updateProfileField('profile-fullname', profileData.fullName || userData.name || 'Ayush Harinkhere');
+    updateProfileField('profile-email', profileData.email || userData.email || 'ayushharinkhere2005@email.com');
+    updateProfileField('profile-phone', profileData.phone || 'Not provided');
+    updateProfileField('profile-dob', profileData.dob || '10 Feb 2005');
+    updateProfileField('profile-gender', profileData.gender || 'Male');
+    updateProfileField('profile-blood', profileData.bloodGroup || 'Not provided');
+    updateProfileField('profile-height', profileData.height ? `${profileData.height} cm` : '175 cm');
+    updateProfileField('profile-weight', profileData.weight ? `${profileData.weight} kg` : '52 kg');
+    updateProfileField('profile-allergies', profileData.allergies || 'None');
+    updateProfileField('profile-conditions', profileData.conditions || 'None');
+    updateProfileField('profile-history', profileData.medicalHistory || 'Not provided');
+    updateProfileField('profile-emergency', profileData.emergencyContact || 'Not provided');
+    updateProfileField('profile-address', profileData.address || 'Not provided');
+    updateProfileField('profile-marital', profileData.maritalStatus || 'Not provided');
+    updateProfileField('profile-occupation', profileData.occupation || 'Not provided');
+    updateProfileField('profile-insurance', profileData.insurance || 'Not provided');
+    updateProfileField('profile-policy', profileData.policyNumber || 'Not provided');
+    
+    // Calculate and display BMI
+    const height = parseFloat(profileData.height) || 175;
+    const weight = parseFloat(profileData.weight) || 52;
+    const bmi = (weight / ((height / 100) ** 2)).toFixed(1);
+    updateProfileField('profile-bmi', bmi);
+    
+    // Show/hide phone, dob, gender in header if available
+    const phoneDisplay = document.getElementById('profile-phone-display');
+    const dobDisplay = document.getElementById('profile-dob-display');
+    const genderDisplay = document.getElementById('profile-gender-display');
+    
+    if (profileData.phone) {
+        phoneDisplay.style.display = 'block';
+        phoneDisplay.querySelector('span').textContent = profileData.phone;
     }
+    
+    if (profileData.dob) {
+        dobDisplay.style.display = 'block';
+        dobDisplay.querySelector('span').textContent = profileData.dob;
+    }
+    
+    if (profileData.gender) {
+        genderDisplay.style.display = 'block';
+        genderDisplay.querySelector('span').textContent = profileData.gender;
+    }
+    
+    // Update avatar
+    updateProfileAvatar();
+}
+
+function updateProfileField(fieldId, value) {
+    const element = document.getElementById(fieldId);
+    if (element) {
+        element.textContent = value;
+    }
+}
+
+function updateProfileAvatar() {
+    const profileData = JSON.parse(localStorage.getItem('profileData') || '{}');
+    const initialsElement = document.getElementById('profile-initials-large');
+    const avatarImageElement = document.getElementById('profile-avatar-large');
+    const mainInitialsElement = document.getElementById('user-initials');
+    const mainAvatarImageElement = document.getElementById('user-avatar-img');
+    
+    if (profileData.avatarImage) {
+        // Show uploaded image
+        if (avatarImageElement) {
+            avatarImageElement.src = profileData.avatarImage;
+            avatarImageElement.style.display = 'block';
+        }
+        if (mainAvatarImageElement) {
+            mainAvatarImageElement.src = profileData.avatarImage;
+            mainAvatarImageElement.style.display = 'block';
+        }
+        if (initialsElement) initialsElement.style.display = 'none';
+        if (mainInitialsElement) mainInitialsElement.style.display = 'none';
+    } else {
+        // Show initials
+        const name = profileData.fullName || 'Ayush Harinkhere';
+        const initials = name.split(' ').map(n => n[0]).join('').toUpperCase();
+        
+        if (initialsElement) {
+            initialsElement.textContent = initials;
+            initialsElement.style.display = 'block';
+        }
+        if (mainInitialsElement) {
+            mainInitialsElement.textContent = initials;
+            mainInitialsElement.style.display = 'block';
+        }
+        if (avatarImageElement) avatarImageElement.style.display = 'none';
+        if (mainAvatarImageElement) mainAvatarImageElement.style.display = 'none';
+    }
+}
+
+function saveProfile() {
+    // Collect all profile data
+    const profileData = {
+        fullName: document.getElementById('editName')?.value || 'Ayush Harinkhere',
+        email: document.getElementById('editEmail')?.value || 'ayushharinkhere2005@email.com',
+        dob: document.getElementById('editDob')?.value || '2005-02-10',
+        gender: document.getElementById('editGender')?.value || 'Male',
+        height: document.getElementById('editHeight')?.value || '175',
+        weight: document.getElementById('editWeight')?.value || '52',
+        bloodGroup: document.getElementById('editBloodGroup')?.value || '',
+        phone: document.getElementById('editPhone')?.value || '',
+        emergencyContact: document.getElementById('editEmergencyContact')?.value || '',
+        address: document.getElementById('editAddress')?.value || '',
+        allergies: document.getElementById('editAllergies')?.value || '',
+        conditions: document.getElementById('editConditions')?.value || '',
+        medicalHistory: document.getElementById('editMedicalHistory')?.value || '',
+        maritalStatus: document.getElementById('editMaritalStatus')?.value || '',
+        occupation: document.getElementById('editOccupation')?.value || '',
+        insurance: document.getElementById('editInsurance')?.value || '',
+        policyNumber: document.getElementById('editPolicyNumber')?.value || '',
+        avatarImage: document.getElementById('user-avatar-img')?.src || ''
+    };
+    
+    // Save to localStorage
+    localStorage.setItem('profileData', JSON.stringify(profileData));
+    
+    // Update display
+    updateProfileDisplay();
+    
+    // Show success message
+    showToast('Profile updated successfully!', 'success');
+    closeModal('editProfileModal');
+}
+
+function downloadHealthReport() {
+    showToast('Generating your health report...', 'info');
+    
+    setTimeout(() => {
+        // Create a simple text report
+        const profileData = JSON.parse(localStorage.getItem('profileData') || '{}');
+        let report = 'HEALTH REPORT - HealthNest\n';
+        report += '========================\n\n';
+        report += `Name: ${profileData.fullName || 'Ayush Harinkhere'}\n`;
+        report += `Email: ${profileData.email || 'ayushharinkhere2005@email.com'}\n`;
+        report += `Date of Birth: ${profileData.dob || '10 Feb 2005'}\n`;
+        report += `Gender: ${profileData.gender || 'Male'}\n`;
+        report += `Blood Group: ${profileData.bloodGroup || 'Not provided'}\n`;
+        report += `Height: ${profileData.height || '175'} cm\n`;
+        report += `Weight: ${profileData.weight || '52'} kg\n`;
+        report += `BMI: ${(parseFloat(profileData.weight || 52) / ((parseFloat(profileData.height || 175) / 100) ** 2)).toFixed(1)}\n`;
+        report += `Allergies: ${profileData.allergies || 'None'}\n`;
+        report += `Medical Conditions: ${profileData.conditions || 'None'}\n`;
+        report += `Emergency Contact: ${profileData.emergencyContact || 'Not provided'}\n`;
+        report += `Generated on: ${new Date().toLocaleDateString()}\n`;
+        
+        // Create download
+        const blob = new Blob([report], { type: 'text/plain' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `HealthReport_${new Date().toISOString().split('T')[0]}.txt`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+        
+        showToast('Health report downloaded successfully!', 'success');
+    }, 1500);
+}
+
+function viewAppointments() {
+    // Show appointment section
+    const appointmentSection = document.getElementById('appointment-section');
+    if (appointmentSection) {
+        appointmentSection.style.display = 'block';
+        appointmentSection.scrollIntoView({ behavior: 'smooth' });
+    }
+    
+    // Display existing appointments
+    displayAppointments();
+}
+
+// Enhanced login function with Remember Me functionality
+function handleLogin(event) {
+    event.preventDefault();
+    
+    const rememberMe = document.getElementById('rememberMe')?.checked;
+    const email = document.getElementById('login-email')?.value;
+    const password = document.getElementById('login-password')?.value;
+    
+    // Store login data if Remember Me is checked
+    if (rememberMe) {
+        localStorage.setItem('rememberedEmail', email);
+        localStorage.setItem('rememberMe', 'true');
+    } else {
+        localStorage.removeItem('rememberedEmail');
+        localStorage.removeItem('rememberMe');
+    }
+    
+    showToast('Logged in successfully!', 'success');
+    
+    // Hide Login/Signup buttons and show profile icon
+    document.querySelector('.nav-buttons').style.display = 'none';
+    document.getElementById('user-profile-icon').style.display = 'flex';
+    
+    // Show admin link for demo purposes
+    document.getElementById('adminLink').style.display = 'block';
+    
+    // Set user initials
+    const fullName = document.querySelector('[data-key="profileName"]').textContent;
+    const nameParts = fullName.split(' ');
+    const initials = nameParts[0].charAt(0) + (nameParts.length > 1 ? nameParts[nameParts.length - 1].charAt(0) : '');
+    document.getElementById('user-initials').textContent = initials.toUpperCase();
+    
+    // Show profile and appointment sections
+    document.getElementById('user-profile').style.display = 'block';
+    document.getElementById('appointment-section').style.display = 'block';
+    
+    // Update profile display
+    updateProfileDisplay();
+    
+    closeModal('loginModal');
+    closeModal('signupModal');
+}
+
+// Load remembered login data on page load
+function loadRememberedLogin() {
+    const rememberedEmail = localStorage.getItem('rememberedEmail');
+    const rememberMeChecked = localStorage.getItem('rememberMe') === 'true';
+    
+    if (rememberedEmail) {
+        const emailInput = document.getElementById('login-email');
+        const rememberMeCheckbox = document.getElementById('rememberMe');
+        
+        if (emailInput) emailInput.value = rememberedEmail;
+        if (rememberMeCheckbox) rememberMeCheckbox.checked = rememberMeChecked;
+    }
+}
 
 function handleAppointmentBooking(event) {
     event.preventDefault();
@@ -1472,6 +1719,9 @@ function enhanceProfileModal() {
 
 // Initialize enhanced profile when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
+    // Load remembered login data
+    loadRememberedLogin();
+    
     // Existing initialization code...
     
     // Enhance profile modal with additional fields
@@ -1482,5 +1732,14 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Start real-time updates
     startRealTimeUpdates();
+    
+    // Initialize doctor availability
+    initializeDoctorAvailability();
+    
+    // Initialize queue system
+    queueSystem.init();
+    
+    // Request notification permissions
+    notificationManager.requestPermission();
 });
 

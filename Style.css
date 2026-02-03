@@ -417,11 +417,327 @@
             margin: 0;
         }
 
-        /* --- Enhanced Profile Modal Styles --- */
-        #editProfileModal .modal-content {
-            max-width: 50rem;
-            max-height: 80vh;
-            overflow-y: auto;
+        /* --- Social Login Styles --- */
+        .social-login-divider {
+            display: flex;
+            align-items: center;
+            margin: 1.5rem 0;
+            color: var(--on-surface-variant);
+        }
+        
+        .social-login-divider::before,
+        .social-login-divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--outline);
+        }
+        
+        .social-login-divider span {
+            padding: 0 1rem;
+            font-size: 0.9rem;
+        }
+        
+        .social-login-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .social-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--outline);
+            border-radius: var(--border-radius-medium);
+            background: var(--surface);
+            color: var(--on-surface);
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .social-btn:hover {
+            background: var(--surface-variant);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(var(--shadow), 0.1);
+        }
+        
+        .social-btn svg {
+            flex-shrink: 0;
+        }
+        
+        .google-btn:hover {
+            border-color: #4285F4;
+            background: #f8f9fa;
+        }
+        
+        .facebook-btn:hover {
+            border-color: #1877F2;
+            background: #f0f2ff;
+        }
+        
+        .apple-btn:hover {
+            border-color: #000;
+            background: #f8f8f8;
+        }
+        
+        .microsoft-btn:hover {
+            border-color: #00a4ef;
+            background: #f0f8ff;
+        }
+        
+        .form-options {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 1rem 0;
+            font-size: 0.9rem;
+        }
+        
+        .form-options label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            color: var(--on-surface);
+        }
+        
+        .form-options input[type="checkbox"] {
+            margin: 0;
+            accent-color: var(--primary);
+        }
+        
+        .forgot-password {
+            color: var(--primary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.3s ease;
+        }
+        
+        .forgot-password:hover {
+            color: var(--primary-dark);
+            text-decoration: underline;
+        }
+        
+        /* --- Enhanced Profile Section --- */
+        .profile-section {
+            background: var(--surface);
+            border-radius: var(--border-radius-large);
+            padding: 2rem;
+            margin: 2rem 0;
+            box-shadow: 0 0.5rem 2rem rgba(var(--shadow), 0.1);
+        }
+        
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--outline);
+        }
+        
+        .profile-avatar-large {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2rem;
+            font-weight: 600;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .profile-avatar-large img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .profile-info h2 {
+            margin: 0 0 0.5rem 0;
+            color: var(--on-surface);
+        }
+        
+        .profile-info p {
+            margin: 0.25rem 0;
+            color: var(--on-surface-variant);
+        }
+        
+        .profile-details-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .profile-detail-card {
+            background: var(--surface-variant);
+            padding: 1.25rem;
+            border-radius: var(--border-radius-medium);
+            border-left: 4px solid var(--primary);
+        }
+        
+        .profile-detail-card h4 {
+            margin: 0 0 0.75rem 0;
+            color: var(--primary);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .profile-detail-card p {
+            margin: 0.25rem 0;
+            color: var(--on-surface);
+        }
+        
+        .profile-detail-card strong {
+            color: var(--on-surface-variant);
+            font-weight: 500;
+        }
+        
+        /* --- Enhanced Appointment Section --- */
+        .appointment-section {
+            background: var(--surface);
+            border-radius: var(--border-radius-large);
+            padding: 2rem;
+            margin: 2rem 0;
+            box-shadow: 0 0.5rem 2rem rgba(var(--shadow), 0.1);
+        }
+        
+        .appointment-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .appointment-header h2 {
+            margin: 0 0 0.5rem 0;
+            color: var(--on-surface);
+        }
+        
+        .appointment-header p {
+            color: var(--on-surface-variant);
+            margin: 0;
+        }
+        
+        .appointment-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .appointment-feature {
+            text-align: center;
+            padding: 1.5rem;
+            background: var(--surface-variant);
+            border-radius: var(--border-radius-medium);
+            transition: transform 0.3s ease;
+        }
+        
+        .appointment-feature:hover {
+            transform: translateY(-2px);
+        }
+        
+        .appointment-feature .icon {
+            font-size: 2rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+        
+        .appointment-feature h4 {
+            margin: 0 0 0.5rem 0;
+            color: var(--on-surface);
+        }
+        
+        .appointment-feature p {
+            margin: 0;
+            color: var(--on-surface-variant);
+            font-size: 0.9rem;
+        }
+        
+        .appointment-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        /* --- Hero Section Enhancement --- */
+        .hero-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+        
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .hero-buttons .cta-button,
+        .hero-buttons .appointment-button {
+            padding: 0.75rem 2rem;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: var(--border-radius-medium);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .hero-buttons .appointment-button {
+            background: var(--secondary);
+            color: var(--on-secondary);
+        }
+        
+        .hero-buttons .appointment-button:hover {
+            background: var(--secondary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(var(--secondary), 0.3);
+        }
+        
+        @media (max-width: 768px) {
+            .profile-header {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .profile-details-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .appointment-features {
+                grid-template-columns: 1fr;
+            }
+            
+            .appointment-actions {
+                flex-direction: column;
+            }
+            
+            .hero-buttons {
+                flex-direction: column;
+                width: 100%;
+            }
+            
+            .hero-buttons .cta-button,
+            .hero-buttons .appointment-button {
+                width: 100%;
+            }
         }
 
         .form-grid {

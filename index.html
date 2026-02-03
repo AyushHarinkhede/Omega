@@ -58,30 +58,127 @@
     <div class="hero-content">
       <h1 data-key="heroTitle">Your Health, In Your Hands.</h1>
       <p data-key="heroSubtitle">Save your entire medical history in one secure place and access it anytime, anywhere.</p>
-      <a href="#" class="cta-button" data-key="heroCTA" onclick="openModal('signupModal')">Get Started Today</a>
+      <div class="hero-buttons">
+        <a href="#" class="cta-button" data-key="heroCTA" onclick="openModal('signupModal')">Get Started Today</a>
+        <button class="appointment-button" onclick="openModal('appointmentModal')">Book Appointment</button>
+      </div>
     </div>
   </header>
 
   <main>
-    <!-- PROFILE SECTION -->
-    <section id="user-profile" class="section">
-      <h2 class="section-title" data-key="profileTitle">Your Profile</h2>
-      <div class="profile-card">
-        <div class="profile-pic">
-          <i id="profilePicIcon" class="fas fa-user"></i>
+    <!-- ENHANCED PROFILE SECTION -->
+    <section id="user-profile" class="section" style="display:none;">
+      <div class="profile-section">
+        <div class="profile-header">
+          <div class="profile-avatar-large">
+            <span id="profile-initials-large"></span>
+            <img id="profile-avatar-large" src="" alt="User Avatar" style="display:none;">
+          </div>
+          <div class="profile-info">
+            <h2 id="profile-name-display">Ayush Harinkhere</h2>
+            <p id="profile-email-display">ayushharinkhere2005@email.com</p>
+            <p id="profile-phone-display" style="display:none;">📱 <span></span></p>
+            <p id="profile-dob-display" style="display:none;">📅 <span></span></p>
+            <p id="profile-gender-display" style="display:none;">👤 <span></span></p>
+          </div>
         </div>
-        <div class="profile-details">
-          <h3 data-key="profileName">Ayush Harinkhere</h3>
-          <p id="profileEmail" class="user-email">ayushharinkhere2005@email.com</p>
-          <div class="profile-meta">
-            <div class="meta-item"><span data-key="profileAgeLabel">Age</span><strong id="profileAgeValue">20 years</strong></div>
-            <div class="meta-item"><span>Gender</span><strong id="profileGender">Male</strong></div>
-            <div class="meta-item"><span data-key="profileHeightLabel">Height</span><strong id="profileHeightValue">175 cm</strong></div>
-            <div class="meta-item"><span data-key="profileWeightLabel">Weight</span><strong id="profileWeightValue">52 kg</strong></div>
+        
+        <div class="profile-details-grid">
+          <div class="profile-detail-card">
+            <h4>Personal Information</h4>
+            <p><strong>Full Name:</strong> <span id="profile-fullname">Ayush Harinkhere</span></p>
+            <p><strong>Email:</strong> <span id="profile-email">ayushharinkhere2005@email.com</span></p>
+            <p><strong>Phone:</strong> <span id="profile-phone">Not provided</span></p>
+            <p><strong>Date of Birth:</strong> <span id="profile-dob">10 Feb 2005</span></p>
+            <p><strong>Gender:</strong> <span id="profile-gender">Male</span></p>
+            <p><strong>Marital Status:</strong> <span id="profile-marital">Not provided</span></p>
+            <p><strong>Occupation:</strong> <span id="profile-occupation">Not provided</span></p>
           </div>
-          <div class="profile-actions">
-            <button class="cta-button" onclick="openModal('editProfileModal')"><i class="fas fa-edit"></i> Edit Profile</button>
+          
+          <div class="profile-detail-card">
+            <h4>Medical Information</h4>
+            <p><strong>Blood Group:</strong> <span id="profile-blood">Not provided</span></p>
+            <p><strong>Height:</strong> <span id="profile-height">175 cm</span></p>
+            <p><strong>Weight:</strong> <span id="profile-weight">52 kg</span></p>
+            <p><strong>BMI:</strong> <span id="profile-bmi">17.0</span></p>
+            <p><strong>Allergies:</strong> <span id="profile-allergies">None</span></p>
+            <p><strong>Medical Conditions:</strong> <span id="profile-conditions">None</span></p>
+            <p><strong>Medical History:</strong> <span id="profile-history">Not provided</span></p>
           </div>
+          
+          <div class="profile-detail-card">
+            <h4>Contact & Address</h4>
+            <p><strong>Emergency Contact:</strong> <span id="profile-emergency">Not provided</span></p>
+            <p><strong>Address:</strong> <span id="profile-address">Not provided</span></p>
+            <p><strong>City:</strong> <span id="profile-city">Not provided</span></p>
+            <p><strong>State:</strong> <span id="profile-state">Not provided</span></p>
+            <p><strong>Pincode:</strong> <span id="profile-pincode">Not provided</span></p>
+          </div>
+          
+          <div class="profile-detail-card">
+            <h4>Insurance Information</h4>
+            <p><strong>Insurance Provider:</strong> <span id="profile-insurance">Not provided</span></p>
+            <p><strong>Policy Number:</strong> <span id="profile-policy">Not provided</span></p>
+            <p><strong>Coverage Type:</strong> <span id="profile-coverage">Not provided</span></p>
+            <p><strong>Valid Till:</strong> <span id="profile-validity">Not provided</span></p>
+          </div>
+        </div>
+        
+        <div class="profile-actions">
+          <button class="cta-button" onclick="openModal('editProfileModal')">
+            <i class="fas fa-edit"></i> Edit Profile
+          </button>
+          <button class="login-btn" onclick="openModal('appointmentModal')">
+            <i class="fas fa-calendar-alt"></i> Book Appointment
+          </button>
+          <button class="signup-btn" onclick="downloadHealthReport()">
+            <i class="fas fa-download"></i> Download Health Report
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ENHANCED APPOINTMENT SECTION -->
+    <section id="appointment-section" class="section" style="display:none;">
+      <div class="appointment-section">
+        <div class="appointment-header">
+          <h2>Book Your Appointment</h2>
+          <p>Schedule your appointment with our expert doctors easily and conveniently</p>
+        </div>
+        
+        <div class="appointment-features">
+          <div class="appointment-feature">
+            <div class="icon">👨‍⚕️</div>
+            <h4>Expert Doctors</h4>
+            <p>Consult with experienced medical professionals</p>
+          </div>
+          <div class="appointment-feature">
+            <div class="icon">📅</div>
+            <h4>Flexible Scheduling</h4>
+            <p>Choose time slots that work best for you</p>
+          </div>
+          <div class="appointment-feature">
+            <div class="icon">🏥</div>
+            <h4>Multiple Specialties</h4>
+            <p>Access various medical specialties</p>
+          </div>
+          <div class="appointment-feature">
+            <div class="icon">💊</div>
+            <h4>Prescription Support</h4>
+            <p>Get digital prescriptions instantly</p>
+          </div>
+        </div>
+        
+        <div class="appointment-actions">
+          <button class="cta-button" onclick="openModal('appointmentModal')">
+            <i class="fas fa-calendar-plus"></i> Book New Appointment
+          </button>
+          <button class="login-btn" onclick="viewAppointments()">
+            <i class="fas fa-list"></i> View My Appointments
+          </button>
+          <button class="signup-btn" onclick="openModal('doctorAvailabilityModal')">
+            <i class="fas fa-user-md"></i> Check Doctor Availability
+          </button>
         </div>
       </div>
     </section>
@@ -405,47 +502,152 @@
   <!-- ===== MODALS ===== -->
 
   <!-- LOGIN MODAL -->
-  <div id="loginModal" class="modal-overlay" role="dialog" aria-labelledby="loginModalTitle" aria-modal="true">
+  <div id="loginModal" class="modal-overlay" role="dialog" aria-labelledby="loginTitle" aria-modal="true">
     <div class="modal-content">
       <div class="modal-header">
-        <h2 id="loginModalTitle">Welcome Back!</h2>
+        <h2 id="loginTitle" data-key="loginTitle">Welcome Back</h2>
         <button class="modal-close-btn" onclick="closeModal('loginModal')">&times;</button>
       </div>
       <form onsubmit="handleLogin(event)">
-        <input type="email" class="modal-input" placeholder="Enter your email" required>
-        <div class="password-wrapper">
+        <label for="login-email" data-key="emailLabel">Email</label>
+        <input type="email" id="login-email" class="modal-input" placeholder="your@email.com" required>
+        
+        <label for="login-password" data-key="passwordLabel">Password</label>
+        <div class="password-container">
           <input type="password" id="login-password" class="modal-input" placeholder="Enter your password" required>
-          <button type="button" class="password-toggle" onclick="togglePasswordVisibility('login-password', this)"><i class="fas fa-eye"></i></button>
+          <button type="button" class="password-toggle-btn" onclick="togglePassword('login-password')">
+            <span class="material-symbols-outlined">visibility</span>
+          </button>
         </div>
+        
         <div class="form-options">
-          <label><input type="checkbox"> Remember Me</label>
-          <a href="#" style="color: var(--primary);">Forgot Password?</a>
+          <label>
+            <input type="checkbox" id="rememberMe">
+            <span data-key="rememberMe">Remember Me</span>
+          </label>
+          <a href="#" class="forgot-password" data-key="forgotPassword">Forgot Password?</a>
         </div>
-        <button type="submit" class="cta-button" style="width:100%;">Log In</button>
+        
+        <button type="submit" class="cta-button" data-key="loginBtn">Log In</button>
       </form>
+      
+      <div class="social-login-divider">
+        <span>OR</span>
+      </div>
+      
+      <div class="social-login-buttons">
+        <button class="social-btn google-btn" onclick="socialLogin('google')">
+          <svg width="20" height="20" viewBox="0 0 24 24">
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+          </svg>
+          Continue with Google
+        </button>
+        
+        <button class="social-btn facebook-btn" onclick="socialLogin('facebook')">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="#1877F2">
+            <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+          </svg>
+          Continue with Facebook
+        </button>
+        
+        <button class="social-btn apple-btn" onclick="socialLogin('apple')">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="#000">
+            <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
+          </svg>
+          Continue with Apple
+        </button>
+        
+        <button class="social-btn microsoft-btn" onclick="socialLogin('microsoft')">
+          <svg width="20" height="20" viewBox="0 0 24 24">
+            <rect x="2" y="2" width="9" height="9" fill="#f25022"/>
+            <rect x="13" y="2" width="9" height="9" fill="#7fba00"/>
+            <rect x="2" y="13" width="9" height="9" fill="#00a4ef"/>
+            <rect x="13" y="13" width="9" height="9" fill="#ffb900"/>
+          </svg>
+          Continue with Microsoft
+        </button>
+      </div>
+      
+      <p class="modal-footer-text" data-key="signupPrompt">Don't have an account? <a href="#" onclick="switchToSignup()">Sign Up</a></p>
     </div>
   </div>
 
   <!-- SIGNUP MODAL -->
-  <div id="signupModal" class="modal-overlay" role="dialog" aria-labelledby="signupModalTitle" aria-modal="true">
+  <div id="signupModal" class="modal-overlay" role="dialog" aria-labelledby="signupTitle" aria-modal="true">
     <div class="modal-content">
       <div class="modal-header">
-        <h2 id="signupModalTitle">Create Your Account</h2>
+        <h2 id="signupTitle" data-key="signupTitle">Create Account</h2>
         <button class="modal-close-btn" onclick="closeModal('signupModal')">&times;</button>
       </div>
-      <form onsubmit="handleLogin(event)">
-        <input type="text" class="modal-input" placeholder="Username" required>
-        <input type="email" class="modal-input" placeholder="Your Email" required>
-        <div class="password-wrapper">
-          <input type="password" id="signup-password" class="modal-input" placeholder="Create Password" required>
-          <button type="button" class="password-toggle" onclick="togglePasswordVisibility('signup-password', this)"><i class="fas fa-eye"></i></button>
+      <form onsubmit="handleSignup(event)">
+        <label for="signup-name" data-key="nameLabel">Full Name</label>
+        <input type="text" id="signup-name" class="modal-input" placeholder="John Doe" required>
+        
+        <label for="signup-email" data-key="emailLabel">Email</label>
+        <input type="email" id="signup-email" class="modal-input" placeholder="your@email.com" required>
+        
+        <label for="signup-password" data-key="passwordLabel">Password</label>
+        <div class="password-container">
+          <input type="password" id="signup-password" class="modal-input" placeholder="Create a password" required>
+          <button type="button" class="password-toggle-btn" onclick="togglePassword('signup-password')">
+            <span class="material-symbols-outlined">visibility</span>
+          </button>
         </div>
-        <div class="password-wrapper">
-          <input type="password" id="signup-confirm-password" class="modal-input" placeholder="Confirm Password" required>
-          <button type="button" class="password-toggle" onclick="togglePasswordVisibility('signup-confirm-password', this)"><i class="fas fa-eye"></i></button>
+        
+        <div class="form-options">
+          <label>
+            <input type="checkbox" id="agreeTerms" required>
+            <span>I agree to the <a href="#" onclick="openModal('privacyPolicyModal')">Terms & Privacy Policy</a></span>
+          </label>
         </div>
-        <button type="submit" class="cta-button" style="width:100%; margin-top: 1rem;">Sign Up</button>
+        
+        <button type="submit" class="cta-button" data-key="signupBtn">Sign Up</button>
       </form>
+      
+      <div class="social-login-divider">
+        <span>OR</span>
+      </div>
+      
+      <div class="social-login-buttons">
+        <button class="social-btn google-btn" onclick="socialLogin('google')">
+          <svg width="20" height="20" viewBox="0 0 24 24">
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+          </svg>
+          Continue with Google
+        </button>
+        
+        <button class="social-btn facebook-btn" onclick="socialLogin('facebook')">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="#1877F2">
+            <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+          </svg>
+          Continue with Facebook
+        </button>
+        
+        <button class="social-btn apple-btn" onclick="socialLogin('apple')">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="#000">
+            <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
+          </svg>
+          Continue with Apple
+        </button>
+        
+        <button class="social-btn microsoft-btn" onclick="socialLogin('microsoft')">
+          <svg width="20" height="20" viewBox="0 0 24 24">
+            <rect x="2" y="2" width="9" height="9" fill="#f25022"/>
+            <rect x="13" y="2" width="9" height="9" fill="#7fba00"/>
+            <rect x="2" y="13" width="9" height="9" fill="#00a4ef"/>
+            <rect x="13" y="13" width="9" height="9" fill="#ffb900"/>
+          </svg>
+          Continue with Microsoft
+        </button>
+      </div>
+      
+      <p class="modal-footer-text" data-key="loginPrompt">Already have an account? <a href="#" onclick="switchToLogin()">Log In</a></p>
     </div>
   </div>
 
