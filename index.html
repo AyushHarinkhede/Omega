@@ -21,29 +21,81 @@
     </svg>
   </div>
 
-  <!-- NAVBAR -->
-  <nav class="navbar" id="navbar">
-    <div class="logo">
-      <span class="material-symbols-outlined">health_and_safety</span>
-      HealthNest
-    </div>
-    <div class="nav-links">
-      <a href="#home"><i class="fas fa-home"></i><span data-key="navHome">Home</span></a>
-      <a href="#features"><i class="fas fa-star"></i><span data-key="featuresTitle">Features</span></a>
-      <a href="#dashboard"><i class="fas fa-chart-line"></i><span data-key="navDashboard">Dashboard</span></a>
-      <a href="#appointments"><i class="fas fa-calendar-alt"></i><span>Appointments</span></a>
-      <a href="#queue"><i class="fas fa-list"></i><span>Queue</span></a>
-      <a href="#doctors"><i class="fas fa-user-md"></i><span>Doctors</span></a>
-      <a href="#faq"><i class="fas fa-question-circle"></i><span data-key="faqTitle">FAQ</span></a>
-    </div>
-    <div class="search-container">
-      <input type="search" id="search-bar-input" class="search-bar" placeholder="Search...">
-    </div>
-    <div class="nav-buttons">
-      <button class="login-btn" onclick="openModal('loginModal')" data-key="navLogIn">Log In</button>
-      <button class="signup-btn" onclick="openModal('signupModal')" data-key="navSignUp">Sign Up</button>
-    </div>
-  </nav>
+            <nav class="navbar" id="navbar"> 
+                <div class="logo">
+                    <span class="material-symbols-outlined">health_and_safety</span>
+                    HealthNest
+                <!-- He ve maza code bagh aani vichar kar re bada -->
+
+    <nav class="navbar" id="navbar"> 
+        <div class="logo">
+            <span class="material symbols outlined"></span>
+            HealthNest
+
+        </div>
+        
+        <div class="nav-links">
+            <a href="#home"><i class="fas fa-home"></i><span data-key="navHome">Home</span></a>
+            <a href="#features"><i class="fas fa-star"></i><span data-key="featuresTitle">Features</span></a>
+            <a href="#dashboard"><i class="fas fa-chart-line"></i><span data-key="navDashboard">Dashboard</span></a>
+            <a href="#appointments"><i class="fas fa-calendar-alt"></i><span>Appointments</span></a>
+            <a href="#queue"><i class="fas fa-list"></i><span>Queue</span></a>
+            <a href="#admin" id="adminLink" style="display:none;"><i class="fas fa-cog"></i><span>Admin</span></a>
+            <a href="#faq"><i class="fas fa-question-circle"></i><span data-key="faqTitle">FAQ</span></a>
+        </div>
+        
+        <div class="search-container">
+            <input type="search" id="search-bar-input" class="search-bar" placeholder="Search features, FAQs...">
+        </div>
+      
+        <div class="nav-buttons">
+            <button class="login-btn" onclick="openModal('loginModal')" data-key="navLogIn" aria-haspopup="dialog">Log In</button>
+            <button class="signup-btn" onclick="openModal('signupModal')" data-key="navSignUp" aria-haspopup="dialog">Sign Up</button>
+        </div>
+        <div id="user-profile-icon">
+            <div class="profile-avatar">
+                <span id="user-initials"></span>
+                <img id="user-avatar-img" src="" alt="User Avatar" style="display:none;">
+
+        <!-- He ve maza code bagh aani vichar kar re bada -->
+
+        
+            <div class="nav-links">
+                <a href="HealthNest.html"><i class="fas fa-home"></i><span data-key="navHome">Home</span></a>
+                <a href="#features"><i class="fas fa-star"></i><span data-key="featuresTitle">Features</span></a>
+                <a href="#dashboard"><i class="fas fa-chart-line"></i><span data-key="navDashboard">Dashboard</span></a>
+                <a href="#faq"><i class="fas fa-question-circle"></i><span data-key="faqTitle">FAQ</span></a>
+          </div>
+            <div class="search-container">
+                <input type="search" id="search-bar-input" class="search-bar" placeholder="Search features, FAQs...">
+
+            </div>
+      
+            <div class="nav-buttons">
+                <button class="login-btn" onclick="openModal('loginModal')" data-key="navLogIn" aria-haspopup="dialog">Log In</button>
+                <button class="signup-btn" onclick="openModal('signupModal')" data-key="navSignUp" aria-haspopup="dialog">Sign Up</button>
+            </div>
+            <div id="user-profile-icon">
+                <div class="profile-avatar">
+                    <span id="user-initials"></span>
+                    <img id="user-avatar-img" src="" alt="User Avatar" style="display:none;">
+                </div>
+
+                <div class="form-options">
+                    <label for="remember me"><input type="checkbox" id="remember-me"> Remember Me</label>
+                    <a href="#" style="color: var(--primary);">Forgot Password?</a>
+                </div>
+                <button type="submit" class="cta-button" style="width:100%;">Log In</button>
+            </form>
+            <div class="or-divider">OR</div>
+            <div class="social-logins">
+                <button class="social-btn" onclick="showToast('Logging in with Google...', 'info')"><i class="fab fa-google" style="color:#DB4437;"></i> Google</button>
+                <button class="social-btn" onclick="showToast('Logging in with Microsoft...', 'info')"><i class="fab fa-microsoft" style="color:#00A4EF;"></i> Microsoft</button>
+                <button class="social-btn" onclick="showToast('Logging in with Apple...', 'info')"><i class="fab fa-apple" style="color:#555;"></i> Apple</button>
+                <button class="social-btn" onclick="showToast('Logging in with Facebook...', 'info')"><i class="fab fa-facebook" style="color:#1877F2;"></i> Facebook</button>
+
+            </div>
+            </nav>
 
   <!-- HERO SECTION -->
   <header class="hero">
