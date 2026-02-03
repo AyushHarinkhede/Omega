@@ -38,13 +38,13 @@
             preloader.classList.add('hidden');
         }, 2000); // Show preloader for 2 seconds
 
-        // Load saved settings or defaults (forcing default on load)
+        // Load saved settings or defaults (safe checks if controls missing)
         changeTheme('light');
-        document.getElementById('theme').value = 'light';
+        const themeEl = document.getElementById('theme'); if (themeEl) themeEl.value = 'light';
         switchLanguage('en');
-        document.getElementById('language').value = 'en';
+        const langEl = document.getElementById('language'); if (langEl) langEl.value = 'en';
         changeTextSize('16px');
-        document.getElementById('textSize').value = '16px';
+        const textSizeEl = document.getElementById('textSize'); if (textSizeEl) textSizeEl.value = '16px';
 
 
         // Initialize components
@@ -82,18 +82,21 @@
             }
         });
 
-        // Search Bar Functionality
-        document.getElementById('search-bar-input').addEventListener('input', function(e) {
-            const query = e.target.value.toLowerCase();
-            document.querySelectorAll('[data-searchable]').forEach(item => {
-                const text = item.getAttribute('data-searchable').toLowerCase();
-                if (text.includes(query)) {
-                    item.style.display = '';
-                } else {
-                    item.style.display = 'none';
-                }
+        // Search Bar Functionality (guarded)
+        const searchInput = document.getElementById('search-bar-input');
+        if (searchInput) {
+            searchInput.addEventListener('input', function(e) {
+                const query = e.target.value.toLowerCase();
+                document.querySelectorAll('[data-searchable]').forEach(item => {
+                    const text = (item.getAttribute('data-searchable') || '').toLowerCase();
+                    if (text.includes(query)) {
+                        item.style.display = '';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
             });
-        });
+        }
     });
 
     function initializeFAQ() {
@@ -121,10 +124,11 @@
                 }
             });
         }, { threshold: 0.1 });
-        animatedElements.forEach(el => { el.style.opacity = '0'; observer.observe(el); });
+        animatedElements.forEach(el => { el.style.opacity = '1'; observer.observe(el); });
     }
     
-    document.getElementById('logoutBtn').addEventListener('click', function() { showToast('Logging out...', 'info'); });
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (logoutBtn) logoutBtn.addEventListener('click', function() { showToast('Logging out...', 'info'); });
     function toggleSettings() { const menu = document.getElementById('settingsMenu'); menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex'; }
     function scrollToTop() { window.scrollTo({ top: 0, behavior: 'smooth' }); }
     function changeTheme(theme) { document.body.setAttribute('data-theme', theme); localStorage.setItem('theme', theme); if (document.getElementById('healthChart')) { renderHealthChart(); } }
@@ -384,11 +388,11 @@
     // this section is for aiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii
     
 
-    // Voice Recognition for AI Chat
+    // Voice Recognition for AI Chat (guarded)
     const voiceBtn = document.getElementById('ai-voice-btn');
     const chatInput = document.getElementById('ai-chat-input');
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (SpeechRecognition) {
+    if (voiceBtn && chatInput && SpeechRecognition) {
         const recognition = new SpeechRecognition();
         recognition.continuous = false;
         recognition.lang = 'en-US';
@@ -407,7 +411,7 @@
             const transcript = event.results[0][0].transcript;
             chatInput.value = transcript;
             // Automatically submit the form
-            document.getElementById('ai-chat-input-form').requestSubmit();
+            const form = document.getElementById('ai-chat-input-form'); if (form) form.requestSubmit();
         };
 
         recognition.onend = () => {
@@ -418,8 +422,8 @@
             showToast('Voice recognition error: ' + event.error, 'error');
             voiceBtn.classList.remove('recording');
         };
-    } else {
-        voiceBtn.style.display = 'none'; // Hide if not supported
+    } else if (voiceBtn) {
+        voiceBtn.style.display = 'none'; // Hide if not supported or inputs missing
     }
 
 

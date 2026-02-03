@@ -25,8 +25,7 @@
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', 'Roboto', sans-serif; }
         html { scroll-behavior: smooth; }
-        body { background-color: var(--background); color: var(--on-background); opacity: 0; animation: fadeInPage 0.8s ease-in-out forwards; overflow-x: hidden; transition: background-color 0.4s ease, color 0.4s ease; font-size: 1rem; }
-        @keyframes fadeInPage { to { opacity: 1; } }
+        body { background-color: var(--background); color: var(--on-background); opacity: 1; overflow-x: hidden; transition: background-color 0.4s ease, color 0.4s ease; font-size: 1rem; }
 
         #preloader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--background); z-index: 9999; display: flex; justify-content: center; align-items: center; transition: opacity 0.8s ease, visibility 0.8s ease; }
         #preloader.hidden { opacity: 0; visibility: hidden; }
@@ -38,8 +37,8 @@
 
         /* --- 3D Glass Tube Navigation Bar --- */ 
         nav {
-            background: rgba(var(--surface-rgb), 0.5); /* Semi-transparent base */
-            backdrop-filter: blur(25px) saturate(180%); /* Increased blur for glass effect */
+            background: rgba(var(--surface-rgb), 0.6); /* Semi-transparent base */
+            backdrop-filter: blur(10px) saturate(140%); /* Reduced blur to avoid heavy page blur */
             padding: 15px 30px;
             position: fixed;
             width: calc(100% - 40px); 
@@ -452,18 +451,18 @@
         #settingsMenu button { width: 100%; padding: 0.75rem; margin-top: 1rem; border: none; border-radius: var(--border-radius-full); background: var(--primary); color: var(--on-primary); font-weight: bold; cursor: pointer; transition: background 0.3s, transform 0.2s; }
         #settingsMenu button:hover { filter: brightness(1.15); }
         
-        .hero { display: flex; align-items: center; justify-content: center; text-align: center; min-height: 100vh; padding: 7.5rem 1.25rem 1.25rem 1.25rem; background-color: var(--primary-container); position: relative; overflow: hidden; transition: background-color 0.4s ease; }
-        .hero::before, .hero::after { content: ''; position: absolute; border-radius: 50%; z-index: 0; animation: float 20s infinite ease-in-out; filter: blur(20px); opacity: 0.4; }
+        .hero { display: flex; align-items: center; justify-content: center; text-align: center; min-height: 70vh; padding: 4rem 1.25rem 3rem 1.25rem; background-color: var(--primary-container); position: relative; overflow: hidden; transition: background-color 0.4s ease; margin-top: 4rem; }
+        .hero::before, .hero::after { content: ''; position: absolute; border-radius: 50%; z-index: 0; animation: float 20s infinite ease-in-out; filter: blur(8px); opacity: 0.35; }
         .hero::before { width: 30vw; height: 30vw; background: var(--primary); top: 10%; left: -5%; }
         .hero::after { width: 25vw; height: 25vw; background: var(--tertiary); bottom: 10%; right: -5%; animation-delay: 4s; }
         .hero-content { max-width: 50rem; z-index: 1; }
         /* --- Hero Title Font --- */
-        .hero h1 { font-size: clamp(2.8rem, 5vw, 4.5rem); color: var(--on-primary-container); animation: slideInUp 0.8s cubic-bezier(0.25, 0.8, 0.25, 1) forwards; font-weight: 700; opacity: 0; font-family: 'Playfair Display', serif;}
-        .hero p { font-size: clamp(1rem, 2vw, 1.25rem); color: var(--on-surface-variant); margin: 1.25rem 0 2.5rem; animation: slideInUp 0.8s cubic-bezier(0.25, 0.8, 0.25, 1) 0.2s forwards; opacity: 0; max-width: 37.5rem; margin-left: auto; margin-right: auto; }
+        .hero h1 { font-size: clamp(2rem, 4vw, 3.2rem); color: var(--on-primary-container); animation: slideInUp 0.8s cubic-bezier(0.25, 0.8, 0.25, 1) forwards; font-weight: 700; opacity: 1; font-family: 'Poppins', 'Roboto', sans-serif; }
+        .hero p { font-size: clamp(0.9rem, 1.8vw, 1rem); color: var(--on-surface-variant); margin: 1.25rem 0 2rem; animation: slideInUp 0.8s cubic-bezier(0.25, 0.8, 0.25, 1) 0.2s forwards; opacity: 1; max-width: 37.5rem; margin-left: auto; margin-right: auto; }
         
-        .section { padding: 6.25rem 10%; text-align: center; overflow: hidden; }
-        .section-title { font-size: 2.8rem; font-weight: 700; color: var(--on-background); margin-bottom: 3.75rem; position: relative; }
-        .section-title::after { content: ''; width: 5rem; height: 0.25rem; background: var(--primary); border-radius: 0.125rem; position: absolute; left: 50%; transform: translateX(-50%); bottom: -1rem; }
+        .section { padding: 3.5rem 6%; text-align: center; overflow: visible; background-color: var(--background); margin: 0; clear: both; }
+        .section-title { font-size: 2rem; font-weight: 700; color: var(--on-background); margin-bottom: 2rem; position: relative; opacity: 1; }
+        .section-title::after { content: ''; width: 4rem; height: 0.2rem; background: var(--primary); border-radius: 0.125rem; position: absolute; left: 50%; transform: translateX(-50%); bottom: -0.75rem; }
         
         /* --- Enhanced Features Section with Horizontal Scroll --- */
         .features-container {
@@ -515,8 +514,8 @@
         .scroll-arrow.left { left: -1.5rem; }
         .scroll-arrow.right { right: -1.5rem; }
 
-        #user-profile { background-color: transparent; }
-        .profile-card { background-color: var(--surface); padding: 2.5rem; border-radius: var(--border-radius-large); box-shadow: 0 0.5rem 2rem rgba(var(--shadow), 0.1); border: 1px solid var(--outline); display: flex; flex-wrap: wrap; align-items: center; gap: 2.5rem; max-width: 62.5rem; margin: 0 auto; text-align: left; transition: transform 0.4s ease, box-shadow 0.4s ease; }
+        #user-profile { background-color: var(--background); }
+        .profile-card { background-color: var(--surface); padding: 2rem; border-radius: var(--border-radius-large); box-shadow: 0 0.4rem 1.5rem rgba(var(--shadow), 0.08); border: 1px solid var(--outline); display: flex; flex-wrap: wrap; align-items: center; gap: 2rem; max-width: 100%; margin: 0 auto; text-align: left; transition: transform 0.4s ease, box-shadow 0.4s ease; opacity: 1; }
         .profile-card:hover { transform: scale(1.02); box-shadow: 0 1rem 2.5rem rgba(var(--shadow), 0.12); }
         .profile-pic { width: 9.375rem; height: 9.375rem; border-radius: 50%; background-color: var(--secondary-container); color: var(--on-secondary-container); display: flex; align-items: center; justify-content: center; font-size: 4rem; position: relative; flex-shrink: 0; }
         .profile-pic img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
@@ -596,7 +595,7 @@
         .newsletter h2 { font-size: 2.2rem; margin-bottom: 1rem; }
         .newsletter input { padding: 1rem 1.5rem; margin: 0.6rem; border: 1px solid var(--outline); border-radius: var(--border-radius-full); width: 18.75rem; max-width: 80%; background-color: var(--surface); color: var(--on-surface); font-size: 1rem; }
         
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(8px); z-index: 2000; display: flex; justify-content: center; align-items: center; opacity: 0; visibility: hidden; transition: opacity 0.4s ease, visibility 0.4s ease; }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.25); backdrop-filter: blur(3px); z-index: 2000; display: flex; justify-content: center; align-items: center; opacity: 0; visibility: hidden; transition: opacity 0.4s ease, visibility 0.4s ease; }
         .modal-overlay.visible { opacity: 1; visibility: visible; }
         .modal-content { background: var(--surface); padding: 1.875rem; border-radius: var(--border-radius-large); width: 90%; max-width: 31.25rem; box-shadow: 0 0.6rem 2.5rem rgba(0,0,0,0.15); transform: scale(0.9); transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1); }
         .modal-overlay.visible .modal-content { transform: scale(1); }
