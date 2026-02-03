@@ -1,13 +1,17 @@
 <html>
     <head>
-<<<<<<< HEAD
+
 <body data-theme="light">
     <link rel="stylesheet" href="./style.css">
     <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <script src="./Vani.js" defer></script>
+
     <script src="./script.js" defer></script>
-=======
+
         <body data-theme="light">
             <title style="text-decoration: wavy;">HealthNest</title>
             <link rel="stylesheet" href="./style.css">
@@ -15,7 +19,7 @@
             <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
             <script src="./script.js" defer></script>
             <script src="Vani.js"></script>
->>>>>>> 5bc9ba0c0199409e41af259007a60ed3f7289f5a
+
 
             <div id="preloader">
                 <svg class="logo-animated" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
@@ -32,8 +36,34 @@
 
     <nav class="navbar" id="navbar"> 
         <div class="logo">
-            <span class="material symbols outlined">health_and_safety</span>
+            <span class="material symbols outlined"></span>
             HealthNest
+
+        </div>
+        
+        <div class="nav-links">
+            <a href="#home"><i class="fas fa-home"></i><span data-key="navHome">Home</span></a>
+            <a href="#features"><i class="fas fa-star"></i><span data-key="featuresTitle">Features</span></a>
+            <a href="#dashboard"><i class="fas fa-chart-line"></i><span data-key="navDashboard">Dashboard</span></a>
+            <a href="#appointments"><i class="fas fa-calendar-alt"></i><span>Appointments</span></a>
+            <a href="#queue"><i class="fas fa-list"></i><span>Queue</span></a>
+            <a href="#admin" id="adminLink" style="display:none;"><i class="fas fa-cog"></i><span>Admin</span></a>
+            <a href="#faq"><i class="fas fa-question-circle"></i><span data-key="faqTitle">FAQ</span></a>
+        </div>
+        
+        <div class="search-container">
+            <input type="search" id="search-bar-input" class="search-bar" placeholder="Search features, FAQs...">
+        </div>
+      
+        <div class="nav-buttons">
+            <button class="login-btn" onclick="openModal('loginModal')" data-key="navLogIn" aria-haspopup="dialog">Log In</button>
+            <button class="signup-btn" onclick="openModal('signupModal')" data-key="navSignUp" aria-haspopup="dialog">Sign Up</button>
+        </div>
+        <div id="user-profile-icon">
+            <div class="profile-avatar">
+                <span id="user-initials"></span>
+                <img id="user-avatar-img" src="" alt="User Avatar" style="display:none;">
+
         <!-- He ve maza code bagh aani vichar kar re bada -->
 
         
@@ -45,6 +75,7 @@
           </div>
             <div class="search-container">
                 <input type="search" id="search-bar-input" class="search-bar" placeholder="Search features, FAQs...">
+
             </div>
       
             <div class="nav-buttons">
@@ -221,6 +252,107 @@
                 </div>
             </div>
 
+
+    <!-- Patient Registration Modal -->
+    <div id="patientRegistrationModal" class="modal-overlay" role="dialog" aria-labelledby="patientRegTitle" aria-modal="true">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="patientRegTitle">Complete Patient Registration</h2>
+                <button class="modal-close-btn" onclick="closeModal('patientRegistrationModal')" aria-label="Close">&times;</button>
+            </div>
+            <form onsubmit="handlePatientRegistration(event)">
+                <div class="form-grid">
+                    <div><label>Full Name</label><input type="text" class="modal-input" required></div>
+                    <div><label>Date of Birth</label><input type="date" class="modal-input" required></div>
+                </div>
+                <div class="form-grid">
+                    <div><label>Mobile Number</label><input type="tel" class="modal-input" required></div>
+                    <div><label>Email</label><input type="email" class="modal-input" required></div>
+                </div>
+                <label>Medical History</label>
+                <textarea class="modal-input" placeholder="Any existing conditions..." rows="4"></textarea>
+                <label>Allergies</label>
+                <input type="text" class="modal-input" placeholder="List any allergies">
+                <button type="submit" class="cta-button" style="width:100%; margin-top: 1rem;">Complete Registration</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Appointment Scheduling Modal -->
+    <div id="appointmentModal" class="modal-overlay" role="dialog" aria-labelledby="appointmentTitle" aria-modal="true">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="appointmentTitle">Schedule Appointment</h2>
+                <button class="modal-close-btn" onclick="closeModal('appointmentModal')" aria-label="Close">&times;</button>
+            </div>
+            <form onsubmit="handleAppointmentBooking(event)">
+                <label>Select Doctor</label>
+                <select id="doctorSelect" class="modal-input" required>
+                    <option value="">Choose a doctor...</option>
+                    <option value="dr-gupta">Dr. Rajesh Gupta - General Physician</option>
+                    <option value="dr-sharma">Dr. Priya Sharma - Cardiologist</option>
+                    <option value="dr-patel">Dr. Amit Patel - Dentist</option>
+                </select>
+                <label>Date</label>
+                <input type="date" id="appointmentDate" class="modal-input" required>
+                <label>Available Time Slots</label>
+                <div id="timeSlots" class="time-slots-grid"></div>
+                <label>Appointment Reason</label>
+                <textarea class="modal-input" placeholder="Describe your symptoms..." rows="3" required></textarea>
+                <button type="submit" class="cta-button" style="width:100%; margin-top: 1rem;">Confirm Appointment</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Admin Panel Modal -->
+    <div id="adminModal" class="modal-overlay" role="dialog" aria-labelledby="adminTitle" aria-modal="true">
+        <div class="modal-content admin-modal-content">
+            <div class="modal-header">
+                <h2 id="adminTitle">Admin & Hospital Authority Dashboard</h2>
+                <button class="modal-close-btn" onclick="closeModal('adminModal')" aria-label="Close">&times;</button>
+            </div>
+            <div class="admin-tabs">
+                <button class="admin-tab-btn active" onclick="switchAdminTab('users')">Users</button>
+                <button class="admin-tab-btn" onclick="switchAdminTab('doctors')">Doctors</button>
+                <button class="admin-tab-btn" onclick="switchAdminTab('appointments')">Appointments</button>
+                <button class="admin-tab-btn" onclick="switchAdminTab('queue')">Queue</button>
+                <button class="admin-tab-btn" onclick="switchAdminTab('crowd')">Crowd Monitor</button>
+            </div>
+            <div id="adminContent" class="admin-tab-content"></div>
+        </div>
+    </div>
+
+    <!-- Emergency Alert Modal -->
+    <div id="emergencyAlertModal" class="modal-overlay" role="dialog" aria-labelledby="emergencyTitle" aria-modal="true">
+        <div class="modal-content emergency-modal">
+            <div class="modal-header">
+                <h2 id="emergencyTitle"><i class="fas fa-exclamation-triangle" style="color: #e74c3c;"></i> Emergency Alert</h2>
+                <button class="modal-close-btn" onclick="closeModal('emergencyAlertModal')">&times;</button>
+            </div>
+            <form onsubmit="handleEmergencyAlert(event)">
+                <label>Emergency Type</label>
+                <select class="modal-input" required>
+                    <option value="">Select emergency type...</option>
+                    <option value="critical">Critical - Immediate Care Needed</option>
+                    <option value="serious">Serious - Urgent Care Required</option>
+                    <option value="moderate">Moderate - Need Quick Attention</option>
+                </select>
+                <label>Symptoms/Description</label>
+                <textarea class="modal-input" placeholder="Describe the emergency..." rows="4" required></textarea>
+                <label><input type="checkbox" required> I confirm this is a genuine emergency</label>
+                <button type="submit" class="cta-button emergency-btn" style="width:100%; background-color: #e74c3c;">Alert Hospital</button>
+            </form>
+        </div>
+    </div>
+
+    <header class="hero">
+        <div class="hero-content">
+            <h1 data-key="heroTitle">Your Health, In Your Hands.</h1>
+            <p data-key="heroSubtitle">With HealthNest, save your entire medical history in one secure place and access it anytime, anywhere.</p>
+            <a href="#" class="cta-button" data-key="heroCTA" onclick="openModal('signupModal')">Get Started Today</a>
+        </div>
+    </header>
+
             <div id="privacyPolicyModal" class="modal-overlay">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -230,6 +362,7 @@
                     <p>Your privacy is important to us. It is HealthNest's policy to respect your privacy regarding any information we may collect from you across our website...</p>
                     </div>
             </div>
+
 
             <div id="termsOfServiceModal" class="modal-overlay">
                 <div class="modal-content">
@@ -293,6 +426,82 @@
                     </div>
                 </section>
 
+
+        <!-- Appointment Scheduling Section -->
+        <section id="appointments" class="section">
+            <h2 class="section-title">Book Your Appointment</h2>
+            <div class="appointment-info">
+                <p>Schedule your appointment with our experienced doctors and specialists.</p>
+                <button class="cta-button" onclick="openModal('appointmentModal')"><i class="fas fa-calendar-plus"></i> Book Appointment</button>
+                <button class="cta-button" onclick="openModal('emergencyAlertModal')" style="background-color: #e74c3c;"><i class="fas fa-exclamation-triangle"></i> Emergency</button>
+            </div>
+            <div id="appointmentsList" class="appointments-container" style="margin-top: 2rem;">
+                <h3>Your Appointments</h3>
+                <div class="appointment-cards" id="appointmentCardsContainer"></div>
+            </div>
+        </section>
+
+        <!-- Queue Management Section -->
+        <section id="queue" class="section">
+            <h2 class="section-title">Hospital Queue & Status</h2>
+            <div class="queue-info-container">
+                <div class="queue-card">
+                    <h3>Your Queue Status</h3>
+                    <div class="queue-status">
+                        <p>Token: <span id="queueToken" class="token-number">--</span></p>
+                        <p>Position: <span id="queuePosition" class="position-number">--</span> in queue</p>
+                        <p>Estimated Wait Time: <span id="waitTime">--</span></p>
+                    </div>
+                </div>
+                <div class="queue-card">
+                    <h3>Hospital Crowd Meter</h3>
+                    <div class="crowd-meter">
+                        <div class="crowd-bar">
+                            <div class="crowd-fill" id="crowdLevel" style="width: 45%;"></div>
+                        </div>
+                        <p>Current Occupancy: <span id="crowdPercentage">45</span>%</p>
+                    </div>
+                </div>
+            </div>
+            <div class="queue-display" id="queueDisplay" style="margin-top: 2rem;">
+                <h3>Live Queue Display</h3>
+                <div class="queue-board">
+                    <div class="current-token">Now Serving: <span id="currentToken">A001</span></div>
+                    <div class="next-tokens">
+                        <h4>Next to be called:</h4>
+                        <ul id="nextTokensList" class="next-tokens-list">
+                            <li>A002</li>
+                            <li>A003</li>
+                            <li>A004</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Doctor Availability Section -->
+        <section id="doctorAvailability" class="section">
+            <h2 class="section-title">Doctor Availability Tracking</h2>
+            <div class="doctors-grid" id="doctorsGrid"></div>
+        </section>
+
+        <!-- Admin Section (Hidden by default) -->
+        <section id="admin" class="section" style="display: none;">
+            <button class="cta-button" onclick="openModal('adminModal')"><i class="fas fa-cog"></i> Open Admin Dashboard</button>
+        </section>
+
+        <section id="faq" class="section">
+            <h2 class="section-title" data-key="faqTitle">Frequently Asked Questions</h2>
+            <div class="faq-accordion">
+                <div class="faq-item" data-searchable="what is healthnest"><button class="faq-question" aria-expanded="false"><span data-key="faq1Question">What is HealthNest?</span><span class="material-symbols-outlined">expand_more</span></button><div class="faq-answer"><p data-key="faq1Answer">HealthNest is a digital platform where you can securely store all your medical information, such as old injuries, treatments, reports, and medications.</p></div></div>
+                <div class="faq-item" data-searchable="is data secure"><button class="faq-question" aria-expanded="false"><span data-key="faq2Question">Is my data secure?</span><span class="material-symbols-outlined">expand_more</span></button><div class="faq-answer"><p data-key="faq2Answer">Yes, we use the highest standards to protect your data. Your information is encrypted, and no one can see it except you.</p></div></div>
+                <div class="faq-item" data-searchable="how to use"><button class="faq-question" aria-expanded="false"><span data-key="faq3Question">How can I use it?</span><span class="material-symbols-outlined">expand_more</span></button><div class="faq-answer"><p data-key="faq3Answer">Just sign up and start adding your health information. You can access it whenever you want to show it to your doctor.</p></div></div>
+                <div class="faq-item hidden-faq" data-searchable="share data with doctor"><button class="faq-question" aria-expanded="false"><span>How do I share my data with my doctor?</span><span class="material-symbols-outlined">expand_more</span></button><div class="faq-answer"><p>You can generate a secure, temporary link from your dashboard to share with your healthcare provider. You have full control over what information is shared and for how long.</p></div></div>
+                <div class="faq-item hidden-faq" data-searchable="forgot password"><button class="faq-question" aria-expanded="false"><span>What if I forget my password?</span><span class="material-symbols-outlined">expand_more</span></button><div class="faq-answer"><p>You can easily reset your password by clicking the "Forgot Password?" link on the login screen and following the instructions sent to your registered email address.</p></div></div>
+                 <button class="cta-button" style="margin-top: 2rem;" id="show-more-faq" onclick="toggleMoreFAQs()">Show More</button>
+            </div>
+        </section>
+
                 <section id="dashboard" class="section">
                     <h2 class="section-title" data-key="navDashboard">Your Health Dashboard</h2>
                     <div class="dashboard-card" style="margin-bottom: 2rem;">
@@ -353,6 +562,7 @@
                 </section>
 
 
+
                 <section id="faq" class="section">
                     <h2 class="section-title" data-key="faqTitle">Frequently Asked Questions</h2>
                     <div class="faq-accordion">
@@ -394,7 +604,7 @@
         </body>
     <footer id="contact">
         <p>
-            <b data-key="footerRights">&copy; 2024-2025 HealthNest. All rights reserved.</b> | 
+            <b data-key="footerRights">&copy; 2026 HealthNest. All rights reserved.</b> | 
             <a href="#" onclick="openModal('privacyPolicyModal')" data-key="footerPrivacy">Privacy Policy</a> | 
             <a href="#" onclick="openModal('termsOfServiceModal')" data-key="footerTerms">Terms of Service</a>
         </p>
@@ -409,11 +619,12 @@
         </div>
         <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i><span><b data-key="footerLogout">Logout</b></span></button>
     </footer>
-<<<<<<< HEAD
-=======
+
+
+
 
   <script src="script.js"></script>
->>>>>>> 5bc9ba0c0199409e41af259007a60ed3f7289f5a
+
 </body>
 
 </html>

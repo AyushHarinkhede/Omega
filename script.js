@@ -51,6 +51,20 @@
         initializeFAQ();
         initializeScrollAnimations();
         renderHealthChart();
+        
+        // Initialize NEW FEATURES
+        queueSystem.init();
+        initializeDoctorAvailability();
+        displayAppointments();
+        notificationManager.requestPermission();
+        
+        // Add event listener for appointment date selection
+        const appointmentDateInput = document.getElementById('appointmentDate');
+        if (appointmentDateInput) {
+            appointmentDateInput.addEventListener('change', (e) => {
+                generateTimeSlots(e.target.value);
+            });
+        }
 
         // Close settings menu and modals on outside click
         document.addEventListener('click', function(event) {
@@ -517,6 +531,302 @@ function renderHealthChart() {
             }
         }
     });
+}
+
+// ==================== NEW FEATURES ====================
+
+// --- QUEUE MANAGEMENT SYSTEM ---
+const queueSystem = {
+    tokens: ['A001', 'A002', 'A003', 'A004', 'A005'],
+    currentToken: 'A001',
+    userToken: null,
+    crowdLevel: 45,
+    init: function() {
+        this.updateQueueDisplay();
+        this.startCrowdMonitoring();
+        setInterval(() => this.simulateQueueProgress(), 5000);
+    },
+    generateToken: function() {
+        const nextNum = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+        this.userToken = 'A' + nextNum;
+        return this.userToken;
+    },
+    updateQueueDisplay: function() {
+        const tokenEl = document.getElementById('queueToken');
+        const posEl = document.getElementById('queuePosition');
+        const waitEl = document.getElementById('waitTime');
+        
+        if (tokenEl && this.userToken) {
+            tokenEl.textContent = this.userToken;
+            const position = this.tokens.indexOf(this.userToken) + 1 || Math.floor(Math.random() * 10) + 5;
+            posEl.textContent = position;
+            waitEl.textContent = (position * 10) + ' minutes';
+        }
+    },
+    simulateQueueProgress: function() {
+        const tokens = ['A001', 'A002', 'A003', 'A004'];
+        const randomToken = tokens[Math.floor(Math.random() * tokens.length)];
+        document.getElementById('currentToken').textContent = randomToken;
+    },
+    startCrowdMonitoring: function() {
+        setInterval(() => {
+            this.crowdLevel = Math.max(20, Math.min(95, this.crowdLevel + (Math.random() - 0.5) * 10));
+            const crowdFill = document.getElementById('crowdLevel');
+            const crowdPercent = document.getElementById('crowdPercentage');
+            if (crowdFill && crowdPercent) {
+                crowdFill.style.width = this.crowdLevel + '%';
+                crowdPercent.textContent = Math.round(this.crowdLevel);
+            }
+        }, 3000);
+    }
+};
+
+// --- DOCTOR AVAILABILITY TRACKING ---
+const doctors = [
+    { id: 'dr-gupta', name: 'Dr. Rajesh Gupta', specialty: 'General Physician', status: 'available', rating: 4.8 },
+    { id: 'dr-sharma', name: 'Dr. Priya Sharma', specialty: 'Cardiologist', status: 'busy', rating: 4.9 },
+    { id: 'dr-patel', name: 'Dr. Amit Patel', specialty: 'Dentist', status: 'available', rating: 4.7 },
+    { id: 'dr-khan', name: 'Dr. Sarah Khan', specialty: 'Pediatrician', status: 'offline', rating: 4.6 }
+];
+
+function initializeDoctorAvailability() {
+    const grid = document.getElementById('doctorsGrid');
+    if (!grid) return;
+    grid.innerHTML = '';
+    
+    doctors.forEach(doc => {
+        const card = document.createElement('div');
+        card.className = 'doctor-card';
+        const statusClass = doc.status === 'available' ? 'available' : doc.status === 'busy' ? 'busy' : 'offline';
+        card.innerHTML = `
+            <div class="doctor-avatar">👨‍⚕️</div>
+            <div class="doctor-name">${doc.name}</div>
+            <div class="doctor-specialty">${doc.specialty}</div>
+            <div class="availability-status ${statusClass}">${doc.status.charAt(0).toUpperCase() + doc.status.slice(1)}</div>
+            <div style="font-size: 0.9rem; color: var(--on-surface-variant);">⭐ ${doc.rating}</div>
+            <button class="cta-button" style="margin-top: 1rem; width: 100%;" onclick="openModal('appointmentModal')" ${doc.status === 'offline' ? 'disabled' : ''}>Book Now</button>
+        `;
+        grid.appendChild(card);
+    });
+}
+
+// --- APPOINTMENT SYSTEM ---
+let appointments = [
+    { id: 1, doctor: 'Dr. Gupta', date: '2025-02-15', time: '10:00 AM', reason: 'Checkup', status: 'confirmed' },
+    { id: 2, doctor: 'Dr. Sharma', date: '2025-02-20', time: '2:00 PM', reason: 'Heart checkup', status: 'confirmed' }
+];
+
+function handleAppointmentBooking(event) {
+    event.preventDefault();
+    const doctor = document.getElementById('doctorSelect').value;
+    const date = document.getElementById('appointmentDate').value;
+    const timeSlots = document.querySelectorAll('.time-slot.selected');
+    
+    if (timeSlots.length === 0) {
+        showToast('Please select a time slot', 'error');
+        return;
+    }
+    
+    const time = timeSlots[0].textContent;
+    const reason = event.target.querySelector('textarea').value;
+    
+    const appointment = {
+        id: appointments.length + 1,
+        doctor: document.querySelector('#doctorSelect option:checked').textContent,
+        date: date,
+        time: time,
+        reason: reason,
+        status: 'confirmed'
+    };
+    
+    appointments.push(appointment);
+    displayAppointments();
+    showToast('Appointment booked successfully! Your token: ' + queueSystem.generateToken(), 'success');
+    queueSystem.updateQueueDisplay();
+    closeModal('appointmentModal');
+}
+
+function displayAppointments() {
+    const container = document.getElementById('appointmentCardsContainer');
+    if (!container) return;
+    container.innerHTML = '';
+    
+    appointments.forEach(apt => {
+        const card = document.createElement('div');
+        card.className = 'appointment-card';
+        card.innerHTML = `
+            <h4>${apt.doctor}</h4>
+            <div class="appointment-details">
+                <p><strong>Date:</strong> ${new Date(apt.date).toLocaleDateString()}</p>
+                <p><strong>Time:</strong> ${apt.time}</p>
+                <p><strong>Reason:</strong> ${apt.reason}</p>
+                <p><strong>Status:</strong> <span style="color: #2ecc71;">${apt.status}</span></p>
+            </div>
+            <button class="cta-button" style="width: 100%; margin-top: 1rem;" onclick="cancelAppointment(${apt.id})">Cancel</button>
+        `;
+        container.appendChild(card);
+    });
+}
+
+function cancelAppointment(id) {
+    appointments = appointments.filter(apt => apt.id !== id);
+    displayAppointments();
+    showToast('Appointment cancelled', 'info');
+}
+
+function generateTimeSlots(selectedDate) {
+    const slotsContainer = document.getElementById('timeSlots');
+    if (!slotsContainer) return;
+    
+    const times = ['09:00 AM', '10:00 AM', '11:00 AM', '12:00 PM', '02:00 PM', '03:00 PM', '04:00 PM', '05:00 PM'];
+    slotsContainer.innerHTML = '';
+    
+    times.forEach(time => {
+        const slot = document.createElement('div');
+        slot.className = 'time-slot';
+        slot.textContent = time;
+        slot.onclick = function() {
+            document.querySelectorAll('.time-slot').forEach(s => s.classList.remove('selected'));
+            this.classList.add('selected');
+        };
+        slotsContainer.appendChild(slot);
+    });
+}
+
+// --- PATIENT REGISTRATION ---
+function handlePatientRegistration(event) {
+    event.preventDefault();
+    const formData = new FormData(event.target);
+    showToast('Patient registration completed successfully!', 'success');
+    closeModal('patientRegistrationModal');
+    displayAppointments();
+}
+
+// --- EMERGENCY ALERT SYSTEM ---
+function handleEmergencyAlert(event) {
+    event.preventDefault();
+    const emergencyType = event.target.querySelector('select').value;
+    const description = event.target.querySelector('textarea').value;
+    
+    showToast('🚨 EMERGENCY ALERT SENT to Hospital! Ambulance will arrive soon.', 'success');
+    
+    // Simulate emergency notification
+    console.log('Emergency Alert:', { type: emergencyType, description: description, timestamp: new Date() });
+    
+    closeModal('emergencyAlertModal');
+}
+
+// --- ADMIN DASHBOARD ---
+function openAdminDashboard() {
+    const isAdmin = confirm('Are you an admin? (This is a demo)');
+    if (isAdmin) {
+        document.getElementById('adminLink').style.display = 'inline-flex';
+        openModal('adminModal');
+        switchAdminTab('users');
+    } else {
+        showToast('Admin access denied', 'error');
+    }
+}
+
+function switchAdminTab(tab) {
+    const buttons = document.querySelectorAll('.admin-tab-btn');
+    buttons.forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active');
+    
+    const content = document.getElementById('adminContent');
+    let html = '';
+    
+    switch(tab) {
+        case 'users':
+            html = `<h3>Registered Users</h3>
+                    <table class="admin-table">
+                        <tr><th>User ID</th><th>Name</th><th>Email</th><th>Status</th><th>Action</th></tr>
+                        <tr><td>U001</td><td>Ayush Harinkhere</td><td>ayush@email.com</td><td>Active</td><td><button class="cta-button">View</button></td></tr>
+                        <tr><td>U002</td><td>John Doe</td><td>john@email.com</td><td>Active</td><td><button class="cta-button">View</button></td></tr>
+                        <tr><td>U003</td><td>Jane Smith</td><td>jane@email.com</td><td>Inactive</td><td><button class="cta-button">View</button></td></tr>
+                    </table>`;
+            break;
+        case 'doctors':
+            html = `<h3>Doctor Management</h3>
+                    <table class="admin-table">
+                        <tr><th>Doctor ID</th><th>Name</th><th>Specialty</th><th>Status</th><th>Action</th></tr>
+                        <tr><td>D001</td><td>Dr. Rajesh Gupta</td><td>General Physician</td><td>Available</td><td><button class="cta-button">Edit</button></td></tr>
+                        <tr><td>D002</td><td>Dr. Priya Sharma</td><td>Cardiologist</td><td>Busy</td><td><button class="cta-button">Edit</button></td></tr>
+                    </table>`;
+            break;
+        case 'appointments':
+            html = `<h3>All Appointments</h3>
+                    <table class="admin-table">
+                        <tr><th>Apt ID</th><th>Patient</th><th>Doctor</th><th>Date</th><th>Status</th></tr>
+                        <tr><td>APT001</td><td>Ayush H.</td><td>Dr. Gupta</td><td>2025-02-15</td><td>Confirmed</td></tr>
+                        <tr><td>APT002</td><td>John Doe</td><td>Dr. Sharma</td><td>2025-02-20</td><td>Confirmed</td></tr>
+                    </table>`;
+            break;
+        case 'queue':
+            html = `<h3>Current Queue Status</h3>
+                    <div style="padding: 1rem; background: var(--primary-container); border-radius: var(--border-radius-medium);">
+                        <p><strong>Total in Queue:</strong> 23</p>
+                        <p><strong>Currently Serving:</strong> A001</p>
+                        <p><strong>Average Wait Time:</strong> 15 minutes</p>
+                    </div>`;
+            break;
+        case 'crowd':
+            html = `<h3>Hospital Crowd Monitor</h3>
+                    <div style="padding: 1rem;">
+                        <p><strong>Current Occupancy:</strong> <span id="crowdPercent">45</span>%</p>
+                        <div class="crowd-bar" style="height: 2rem; margin: 1rem 0;">
+                            <div class="crowd-fill" id="crowdMonitor" style="width: 45%; height: 100%;"></div>
+                        </div>
+                        <p><strong>Capacity:</strong> 200 beds | <strong>Occupied:</strong> 90 beds</p>
+                    </div>`;
+            break;
+    }
+    
+    content.innerHTML = html;
+}
+
+// --- REAL-TIME NOTIFICATIONS ---
+class NotificationManager {
+    constructor() {
+        this.notifications = [];
+    }
+    
+    sendNotification(title, message, type = 'info') {
+        if ('Notification' in window && Notification.permission === 'granted') {
+            new Notification(title, {
+                body: message,
+                icon: '💚'
+            });
+        }
+        showToast(`${title}: ${message}`, type);
+    }
+    
+    requestPermission() {
+        if ('Notification' in window && Notification.permission === 'default') {
+            Notification.requestPermission();
+        }
+    }
+}
+
+const notificationManager = new NotificationManager();
+
+// --- AI MULTILINGUAL HELPDESK ---
+function enhanceAIChat() {
+    // Add multilingual support
+    const languages = ['en', 'hi', 'es', 'fr'];
+    const currentLang = document.documentElement.lang || 'en';
+    
+    // This can be expanded with actual translation APIs
+    const helpTopics = {
+        'appointments': 'How to book an appointment',
+        'emergency': 'Emergency services',
+        'queue': 'Queue management system',
+        'doctor_availability': 'Check doctor availability',
+        'prescriptions': 'View prescriptions',
+        'test_results': 'Check test results'
+    };
+    
+    return helpTopics;
 }
 {/* <script type="module">
   // Import the functions you need from the SDKs you need
