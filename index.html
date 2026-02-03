@@ -4,6 +4,7 @@
     <link rel="stylesheet" href="./style.css">
     <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="./script.js" defer></script>
 
     <div id="preloader">
@@ -20,9 +21,12 @@
         <!-- He ve maza code bagh aani vichar kar re bada -->
         
         <div class="nav-links">
-            <a href="HealthNest.html"><i class="fas fa-home"></i><span data-key="navHome">Home</span></a>
+            <a href="#home"><i class="fas fa-home"></i><span data-key="navHome">Home</span></a>
             <a href="#features"><i class="fas fa-star"></i><span data-key="featuresTitle">Features</span></a>
             <a href="#dashboard"><i class="fas fa-chart-line"></i><span data-key="navDashboard">Dashboard</span></a>
+            <a href="#appointments"><i class="fas fa-calendar-alt"></i><span>Appointments</span></a>
+            <a href="#queue"><i class="fas fa-list"></i><span>Queue</span></a>
+            <a href="#admin" id="adminLink" style="display:none;"><i class="fas fa-cog"></i><span>Admin</span></a>
             <a href="#faq"><i class="fas fa-question-circle"></i><span data-key="faqTitle">FAQ</span></a>
         </div>
         
@@ -210,6 +214,98 @@
             </div>
     </div>
 
+    <!-- Patient Registration Modal -->
+    <div id="patientRegistrationModal" class="modal-overlay" role="dialog" aria-labelledby="patientRegTitle" aria-modal="true">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="patientRegTitle">Complete Patient Registration</h2>
+                <button class="modal-close-btn" onclick="closeModal('patientRegistrationModal')" aria-label="Close">&times;</button>
+            </div>
+            <form onsubmit="handlePatientRegistration(event)">
+                <div class="form-grid">
+                    <div><label>Full Name</label><input type="text" class="modal-input" required></div>
+                    <div><label>Date of Birth</label><input type="date" class="modal-input" required></div>
+                </div>
+                <div class="form-grid">
+                    <div><label>Mobile Number</label><input type="tel" class="modal-input" required></div>
+                    <div><label>Email</label><input type="email" class="modal-input" required></div>
+                </div>
+                <label>Medical History</label>
+                <textarea class="modal-input" placeholder="Any existing conditions..." rows="4"></textarea>
+                <label>Allergies</label>
+                <input type="text" class="modal-input" placeholder="List any allergies">
+                <button type="submit" class="cta-button" style="width:100%; margin-top: 1rem;">Complete Registration</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Appointment Scheduling Modal -->
+    <div id="appointmentModal" class="modal-overlay" role="dialog" aria-labelledby="appointmentTitle" aria-modal="true">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="appointmentTitle">Schedule Appointment</h2>
+                <button class="modal-close-btn" onclick="closeModal('appointmentModal')" aria-label="Close">&times;</button>
+            </div>
+            <form onsubmit="handleAppointmentBooking(event)">
+                <label>Select Doctor</label>
+                <select id="doctorSelect" class="modal-input" required>
+                    <option value="">Choose a doctor...</option>
+                    <option value="dr-gupta">Dr. Rajesh Gupta - General Physician</option>
+                    <option value="dr-sharma">Dr. Priya Sharma - Cardiologist</option>
+                    <option value="dr-patel">Dr. Amit Patel - Dentist</option>
+                </select>
+                <label>Date</label>
+                <input type="date" id="appointmentDate" class="modal-input" required>
+                <label>Available Time Slots</label>
+                <div id="timeSlots" class="time-slots-grid"></div>
+                <label>Appointment Reason</label>
+                <textarea class="modal-input" placeholder="Describe your symptoms..." rows="3" required></textarea>
+                <button type="submit" class="cta-button" style="width:100%; margin-top: 1rem;">Confirm Appointment</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Admin Panel Modal -->
+    <div id="adminModal" class="modal-overlay" role="dialog" aria-labelledby="adminTitle" aria-modal="true">
+        <div class="modal-content admin-modal-content">
+            <div class="modal-header">
+                <h2 id="adminTitle">Admin & Hospital Authority Dashboard</h2>
+                <button class="modal-close-btn" onclick="closeModal('adminModal')" aria-label="Close">&times;</button>
+            </div>
+            <div class="admin-tabs">
+                <button class="admin-tab-btn active" onclick="switchAdminTab('users')">Users</button>
+                <button class="admin-tab-btn" onclick="switchAdminTab('doctors')">Doctors</button>
+                <button class="admin-tab-btn" onclick="switchAdminTab('appointments')">Appointments</button>
+                <button class="admin-tab-btn" onclick="switchAdminTab('queue')">Queue</button>
+                <button class="admin-tab-btn" onclick="switchAdminTab('crowd')">Crowd Monitor</button>
+            </div>
+            <div id="adminContent" class="admin-tab-content"></div>
+        </div>
+    </div>
+
+    <!-- Emergency Alert Modal -->
+    <div id="emergencyAlertModal" class="modal-overlay" role="dialog" aria-labelledby="emergencyTitle" aria-modal="true">
+        <div class="modal-content emergency-modal">
+            <div class="modal-header">
+                <h2 id="emergencyTitle"><i class="fas fa-exclamation-triangle" style="color: #e74c3c;"></i> Emergency Alert</h2>
+                <button class="modal-close-btn" onclick="closeModal('emergencyAlertModal')">&times;</button>
+            </div>
+            <form onsubmit="handleEmergencyAlert(event)">
+                <label>Emergency Type</label>
+                <select class="modal-input" required>
+                    <option value="">Select emergency type...</option>
+                    <option value="critical">Critical - Immediate Care Needed</option>
+                    <option value="serious">Serious - Urgent Care Required</option>
+                    <option value="moderate">Moderate - Need Quick Attention</option>
+                </select>
+                <label>Symptoms/Description</label>
+                <textarea class="modal-input" placeholder="Describe the emergency..." rows="4" required></textarea>
+                <label><input type="checkbox" required> I confirm this is a genuine emergency</label>
+                <button type="submit" class="cta-button emergency-btn" style="width:100%; background-color: #e74c3c;">Alert Hospital</button>
+            </form>
+        </div>
+    </div>
+
     <header class="hero">
         <div class="hero-content">
             <h1 data-key="heroTitle">Your Health, In Your Hands.</h1>
@@ -319,6 +415,69 @@
                      <button class="cta-button" style="margin-top: 1rem;" onclick="toggleEncryptionInfo()">Learn more</button>
                 </div>
             </div>
+        </section>
+
+        <!-- Appointment Scheduling Section -->
+        <section id="appointments" class="section">
+            <h2 class="section-title">Book Your Appointment</h2>
+            <div class="appointment-info">
+                <p>Schedule your appointment with our experienced doctors and specialists.</p>
+                <button class="cta-button" onclick="openModal('appointmentModal')"><i class="fas fa-calendar-plus"></i> Book Appointment</button>
+                <button class="cta-button" onclick="openModal('emergencyAlertModal')" style="background-color: #e74c3c;"><i class="fas fa-exclamation-triangle"></i> Emergency</button>
+            </div>
+            <div id="appointmentsList" class="appointments-container" style="margin-top: 2rem;">
+                <h3>Your Appointments</h3>
+                <div class="appointment-cards" id="appointmentCardsContainer"></div>
+            </div>
+        </section>
+
+        <!-- Queue Management Section -->
+        <section id="queue" class="section">
+            <h2 class="section-title">Hospital Queue & Status</h2>
+            <div class="queue-info-container">
+                <div class="queue-card">
+                    <h3>Your Queue Status</h3>
+                    <div class="queue-status">
+                        <p>Token: <span id="queueToken" class="token-number">--</span></p>
+                        <p>Position: <span id="queuePosition" class="position-number">--</span> in queue</p>
+                        <p>Estimated Wait Time: <span id="waitTime">--</span></p>
+                    </div>
+                </div>
+                <div class="queue-card">
+                    <h3>Hospital Crowd Meter</h3>
+                    <div class="crowd-meter">
+                        <div class="crowd-bar">
+                            <div class="crowd-fill" id="crowdLevel" style="width: 45%;"></div>
+                        </div>
+                        <p>Current Occupancy: <span id="crowdPercentage">45</span>%</p>
+                    </div>
+                </div>
+            </div>
+            <div class="queue-display" id="queueDisplay" style="margin-top: 2rem;">
+                <h3>Live Queue Display</h3>
+                <div class="queue-board">
+                    <div class="current-token">Now Serving: <span id="currentToken">A001</span></div>
+                    <div class="next-tokens">
+                        <h4>Next to be called:</h4>
+                        <ul id="nextTokensList" class="next-tokens-list">
+                            <li>A002</li>
+                            <li>A003</li>
+                            <li>A004</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Doctor Availability Section -->
+        <section id="doctorAvailability" class="section">
+            <h2 class="section-title">Doctor Availability Tracking</h2>
+            <div class="doctors-grid" id="doctorsGrid"></div>
+        </section>
+
+        <!-- Admin Section (Hidden by default) -->
+        <section id="admin" class="section" style="display: none;">
+            <button class="cta-button" onclick="openModal('adminModal')"><i class="fas fa-cog"></i> Open Admin Dashboard</button>
         </section>
 
         <section id="faq" class="section">
