@@ -267,7 +267,7 @@ function socialLogin(provider) {
     setTimeout(() => {
         // Simulate successful login
         const userData = {
-            name: provider === 'google' ? 'John Doe' : 
+            name: provider === 'google' ? 'Enter Your Name' : 
                   provider === 'facebook' ? 'Jane Smith' :
                   provider === 'apple' ? 'Apple User' : 'Microsoft User',
             email: `user@${provider}.com`,
