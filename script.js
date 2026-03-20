@@ -267,6 +267,9 @@
         document.querySelector('.nav-buttons').style.display = 'none';
         document.getElementById('user-profile-icon').style.display = 'flex';
         
+        // Show admin link for demo purposes (in real app, check user role)
+        document.getElementById('adminLink').style.display = 'block';
+        
         // Set user initials
         const fullName = document.querySelector('[data-key="profileName"]').textContent;
         const nameParts = fullName.split(' ');
@@ -280,29 +283,238 @@
         closeModal('signupModal');
     }
 
-    function handleFileUpload(event) {
-        const files = event.target.files;
-        if (files.length > 0) {
-            document.getElementById('uploaded-documents-container').style.display = 'block';
-            const list = document.getElementById('document-list');
-            list.innerHTML = ''; // Clear previous list
-            for(let i = 0; i < files.length; i++) {
-                const li = document.createElement('li');
-                li.textContent = files[i].name;
-                list.appendChild(li);
+function handleAppointmentBooking(event) {
+    event.preventDefault();
+    
+    const doctorSelect = document.getElementById('doctorSelect');
+    const appointmentDate = document.getElementById('appointmentDate');
+    const selectedTimeSlot = document.querySelector('.time-slot.selected');
+    const reasonTextarea = event.target.querySelector('textarea');
+    
+    if (!selectedTimeSlot) {
+        showToast('Please select a time slot', 'error');
+        return;
+    }
+    
+    const appointmentData = {
+        id: 'APT' + Math.floor(Math.random() * 10000).toString().padStart(4, '0'),
+        doctorName: doctorSelect.options[doctorSelect.selectedIndex].text,
+        doctorId: doctorSelect.value,
+        date: appointmentDate.value,
+        time: selectedTimeSlot.textContent,
+        reason: reasonTextarea.value,
+        patientName: document.querySelector('[data-key="profileName"]').textContent,
+        patientEmail: document.getElementById('profileEmail').textContent,
+        status: 'Scheduled',
+        bookingDate: new Date().toISOString(),
+        token: queueSystem.generateToken()
+    };
+    
+    // Save to localStorage
+    let appointments = JSON.parse(localStorage.getItem('appointments') || '[]');
+    appointments.push(appointmentData);
+    localStorage.setItem('appointments', JSON.stringify(appointments));
+    
+    // Update queue system
+    queueSystem.userToken = appointmentData.token;
+    queueSystem.updateQueueDisplay();
+    
+    showToast(`Appointment booked successfully! Your token is ${appointmentData.token}`, 'success');
+    closeModal('appointmentModal');
+    event.target.reset();
+    
+    // Refresh appointments display
+    displayAppointments();
+    
+    // Show notification
+    notificationManager.showNotification(
+        'Appointment Confirmed',
+        `Your appointment with ${appointmentData.doctorName} is scheduled for ${appointmentData.date} at ${appointmentData.time}. Token: ${appointmentData.token}`
+    );
+}
+
+function generateTimeSlots(selectedDate) {
+    const timeSlotsContainer = document.getElementById('timeSlots');
+    if (!timeSlotsContainer) return;
+    
+    const selectedDateObj = new Date(selectedDate);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    // Clear existing slots
+    timeSlotsContainer.innerHTML = '';
+    
+    // Check if selected date is today
+    const isToday = selectedDateObj.getTime() === today.getTime();
+    const currentTime = new Date();
+    
+    // Generate time slots from 9:00 AM to 6:00 PM
+    const startHour = 9;
+    const endHour = 18;
+    
+    for (let hour = startHour; hour < endHour; hour++) {
+        for (let minute = 0; minute < 60; minute += 30) {
+            const time = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+            const timeSlot = document.createElement('div');
+            timeSlot.className = 'time-slot';
+            timeSlot.textContent = time;
+            
+            // Check if slot is in the past for today
+            if (isToday) {
+                const slotTime = new Date();
+                slotTime.setHours(hour, minute, 0, 0);
+                if (slotTime <= currentTime) {
+                    timeSlot.classList.add('booked');
+                    timeSlot.style.cursor = 'not-allowed';
+                }
             }
+            
+            // Randomly mark some slots as booked for demo
+            if (Math.random() < 0.3 && !timeSlot.classList.contains('booked')) {
+                timeSlot.classList.add('booked');
+                timeSlot.style.cursor = 'not-allowed';
+            }
+            
+            if (!timeSlot.classList.contains('booked')) {
+                timeSlot.addEventListener('click', function() {
+                    document.querySelectorAll('.time-slot').forEach(slot => {
+                        slot.classList.remove('selected');
+                    });
+                    this.classList.add('selected');
+                });
+            }
+            
+            timeSlotsContainer.appendChild(timeSlot);
         }
     }
+}
 
-    function analyzeReports() {
-        showToast('AI is analyzing your reports... This is a demo feature.', 'info');
+function displayAppointments() {
+    const appointmentsContainer = document.getElementById('appointmentCardsContainer');
+    if (!appointmentsContainer) return;
+    
+    const appointments = JSON.parse(localStorage.getItem('appointments') || '[]');
+    const userEmail = document.getElementById('profileEmail').textContent;
+    
+    // Filter appointments for current user
+    const userAppointments = appointments.filter(apt => apt.patientEmail === userEmail);
+    
+    appointmentsContainer.innerHTML = '';
+    
+    if (userAppointments.length === 0) {
+        appointmentsContainer.innerHTML = '<p>No appointments scheduled yet.</p>';
+        return;
     }
+    
+    userAppointments.forEach(appointment => {
+        const appointmentCard = document.createElement('div');
+        appointmentCard.className = 'appointment-card';
+        
+        const statusColor = appointment.status === 'Completed' ? '#2ecc71' : 
+                           appointment.status === 'Cancelled' ? '#e74c3c' : '#f39c12';
+        
+        appointmentCard.innerHTML = `
+            <h4 style="color: ${statusColor};">${appointment.status}</h4>
+            <div class="appointment-details">
+                <strong>Doctor:</strong> ${appointment.doctorName}<br>
+                <strong>Date:</strong> ${appointment.date}<br>
+                <strong>Time:</strong> ${appointment.time}<br>
+                <strong>Token:</strong> ${appointment.token || 'N/A'}<br>
+                <strong>Reason:</strong> ${appointment.reason}
+            </div>
+            <div style="margin-top: 1rem; display: flex; gap: 0.5rem;">
+                ${appointment.status === 'Scheduled' ? `
+                    <button class="cta-button" onclick="rescheduleAppointment('${appointment.id}')" style="padding: 0.5rem 1rem; font-size: 0.8rem;">
+                        Reschedule
+                    </button>
+                    <button class="login-btn" onclick="cancelAppointment('${appointment.id}')" style="padding: 0.5rem 1rem; font-size: 0.8rem;">
+                        Cancel
+                    </button>
+                ` : ''}
+            </div>
+        `;
+        
+        appointmentsContainer.appendChild(appointmentCard);
+    });
+}
 
-    function scrollFeatures(direction) {
-        const container = document.getElementById('features-grid');
-        const scrollAmount = container.clientWidth * 0.8; // Scroll 80% of the container width
-        container.scrollBy({ left: direction * scrollAmount, behavior: 'smooth' });
+function rescheduleAppointment(appointmentId) {
+    const appointments = JSON.parse(localStorage.getItem('appointments') || '[]');
+    const appointment = appointments.find(apt => apt.id === appointmentId);
+    
+    if (appointment) {
+        // Remove current appointment
+        const updatedAppointments = appointments.filter(apt => apt.id !== appointmentId);
+        localStorage.setItem('appointments', JSON.stringify(updatedAppointments));
+        
+        // Open appointment modal with prefilled data
+        openModal('appointmentModal');
+        showToast('Please select a new date and time', 'info');
+        
+        // Pre-fill the form
+        setTimeout(() => {
+            const doctorSelect = document.getElementById('doctorSelect');
+            const reasonTextarea = document.querySelector('#appointmentModal textarea');
+            
+            if (doctorSelect) {
+                for (let option of doctorSelect.options) {
+                    if (option.text === appointment.doctorName) {
+                        doctorSelect.value = appointment.doctorId;
+                        break;
+                    }
+                }
+            }
+            
+            if (reasonTextarea) {
+                reasonTextarea.value = appointment.reason;
+            }
+        }, 100);
     }
+}
+
+function cancelAppointment(appointmentId) {
+    if (confirm('Are you sure you want to cancel this appointment?')) {
+        const appointments = JSON.parse(localStorage.getItem('appointments') || '[]');
+        const appointment = appointments.find(apt => apt.id === appointmentId);
+        
+        if (appointment) {
+            appointment.status = 'Cancelled';
+            localStorage.setItem('appointments', JSON.stringify(appointments));
+            
+            showToast('Appointment cancelled successfully', 'success');
+            displayAppointments();
+            
+            notificationManager.showNotification(
+                'Appointment Cancelled',
+                `Your appointment with ${appointment.doctorName} on ${appointment.date} has been cancelled.`
+            );
+        }
+    }
+}
+
+function handleFileUpload(event) {
+    const files = event.target.files;
+    if (files.length > 0) {
+        document.getElementById('uploaded-documents-container').style.display = 'block';
+        const list = document.getElementById('document-list');
+        list.innerHTML = ''; // Clear previous list
+        for(let i = 0; i < files.length; i++) {
+            const li = document.createElement('li');
+            li.textContent = files[i].name;
+            list.appendChild(li);
+        }
+    }
+}
+
+function analyzeReports() {
+    showToast('AI is analyzing your reports... This is a demo feature.', 'info');
+}
+
+function scrollFeatures(direction) {
+    const container = document.getElementById('features-grid');
+    const scrollAmount = container.clientWidth * 0.8; // Scroll 80% of the container width
+    container.scrollBy({ left: direction * scrollAmount, behavior: 'smooth' });
+}
     
     function toggleEncryptionInfo() {
         const info = document.getElementById('encryption-info');
@@ -546,24 +758,365 @@ function renderHealthChart() {
     });
 }
 
-// ==================== NEW FEATURES ====================
+// ==================== ADMIN DASHBOARD FUNCTIONS ====================
 
-// --- QUEUE MANAGEMENT SYSTEM ---
+function switchAdminTab(tabName) {
+    // Hide all tab contents
+    document.querySelectorAll('.admin-tab-content').forEach(tab => {
+        tab.style.display = 'none';
+    });
+    
+    // Remove active class from all tab buttons
+    document.querySelectorAll('.admin-tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    // Show selected tab
+    const selectedTab = document.getElementById(`admin-${tabName}`);
+    if (selectedTab) {
+        selectedTab.style.display = 'block';
+    }
+    
+    // Add active class to clicked button
+    event.target.classList.add('active');
+    
+    // Load data based on tab
+    switch(tabName) {
+        case 'patients':
+            loadPatientsData();
+            break;
+        case 'doctors':
+            loadDoctorsData();
+            break;
+        case 'appointments':
+            loadAppointmentsData();
+            break;
+        case 'analytics':
+            loadAnalyticsCharts();
+            break;
+    }
+}
+
+function handlePatientRegistration(event) {
+    event.preventDefault();
+    
+    const patientData = {
+        id: 'PAT' + Math.floor(Math.random() * 10000).toString().padStart(4, '0'),
+        firstName: document.getElementById('patientFirstName').value,
+        lastName: document.getElementById('patientLastName').value,
+        email: document.getElementById('patientEmail').value,
+        phone: document.getElementById('patientPhone').value,
+        dob: document.getElementById('patientDob').value,
+        gender: document.getElementById('patientGender').value,
+        bloodGroup: document.getElementById('patientBloodGroup').value,
+        emergencyContact: document.getElementById('patientEmergencyContact').value,
+        address: document.getElementById('patientAddress').value,
+        height: document.getElementById('patientHeight').value,
+        weight: document.getElementById('patientWeight').value,
+        allergies: document.getElementById('patientAllergies').value,
+        conditions: document.getElementById('patientConditions').value,
+        insurance: document.getElementById('patientInsurance').value,
+        registrationDate: new Date().toISOString()
+    };
+    
+    // Save to localStorage
+    let patients = JSON.parse(localStorage.getItem('patients') || '[]');
+    patients.push(patientData);
+    localStorage.setItem('patients', JSON.stringify(patients));
+    
+    showToast('Patient registered successfully!', 'success');
+    closeModal('registerPatientModal');
+    event.target.reset();
+    
+    // Refresh patients table if it's visible
+    if (document.getElementById('admin-patients').style.display !== 'none') {
+        loadPatientsData();
+    }
+}
+
+function handleAddDoctor(event) {
+    event.preventDefault();
+    
+    const availability = [];
+    document.querySelectorAll('input[name="availability"]:checked').forEach(checkbox => {
+        availability.push(checkbox.value);
+    });
+    
+    const doctorData = {
+        id: 'DOC' + Math.floor(Math.random() * 1000).toString().padStart(3, '0'),
+        name: document.getElementById('doctorName').value,
+        specialization: document.getElementById('doctorSpecialization').value,
+        email: document.getElementById('doctorEmail').value,
+        phone: document.getElementById('doctorPhone').value,
+        experience: document.getElementById('doctorExperience').value,
+        license: document.getElementById('doctorLicense').value,
+        availability: availability,
+        status: 'Available',
+        patientsToday: 0,
+        joinDate: new Date().toISOString()
+    };
+    
+    // Save to localStorage
+    let doctors = JSON.parse(localStorage.getItem('doctors') || '[]');
+    doctors.push(doctorData);
+    localStorage.setItem('doctors', JSON.stringify(doctors));
+    
+    showToast('Doctor added successfully!', 'success');
+    closeModal('addDoctorModal');
+    event.target.reset();
+    
+    // Refresh doctors table if it's visible
+    if (document.getElementById('admin-doctors').style.display !== 'none') {
+        loadDoctorsData();
+    }
+}
+
+function loadPatientsData() {
+    const patients = JSON.parse(localStorage.getItem('patients') || '[]');
+    const tbody = document.getElementById('patientsTableBody');
+    
+    if (!tbody) return;
+    
+    tbody.innerHTML = '';
+    
+    patients.forEach(patient => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${patient.id}</td>
+            <td>${patient.firstName} ${patient.lastName}</td>
+            <td>${calculateAge(patient.dob)}</td>
+            <td>${patient.bloodGroup || 'N/A'}</td>
+            <td>${patient.phone}</td>
+            <td>${new Date(patient.registrationDate).toLocaleDateString()}</td>
+            <td>
+                <button class="cta-button" onclick="viewPatientDetails('${patient.id}')" style="padding: 0.25rem 0.75rem; font-size: 0.8rem;">
+                    View
+                </button>
+            </td>
+        `;
+        tbody.appendChild(row);
+    });
+}
+
+function loadDoctorsData() {
+    const doctors = JSON.parse(localStorage.getItem('doctors') || '[]');
+    const tbody = document.getElementById('doctorsTableBody');
+    
+    if (!tbody) return;
+    
+    tbody.innerHTML = '';
+    
+    doctors.forEach(doctor => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${doctor.id}</td>
+            <td>${doctor.name}</td>
+            <td>${doctor.specialization}</td>
+            <td><span class="availability-status ${doctor.status.toLowerCase()}">${doctor.status}</span></td>
+            <td>${doctor.patientsToday}</td>
+            <td>${doctor.phone}</td>
+            <td>
+                <button class="cta-button" onclick="viewDoctorDetails('${doctor.id}')" style="padding: 0.25rem 0.75rem; font-size: 0.8rem;">
+                    View
+                </button>
+            </td>
+        `;
+        tbody.appendChild(row);
+    });
+}
+
+function loadAppointmentsData() {
+    const appointments = JSON.parse(localStorage.getItem('appointments') || '[]');
+    const tbody = document.getElementById('appointmentsTableBody');
+    
+    if (!tbody) return;
+    
+    tbody.innerHTML = '';
+    
+    appointments.forEach(appointment => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${appointment.id}</td>
+            <td>${appointment.patientName}</td>
+            <td>${appointment.doctorName}</td>
+            <td>${appointment.date}</td>
+            <td>${appointment.time}</td>
+            <td><span class="availability-status ${appointment.status.toLowerCase()}">${appointment.status}</span></td>
+            <td>
+                <button class="cta-button" onclick="updateAppointmentStatus('${appointment.id}')" style="padding: 0.25rem 0.75rem; font-size: 0.8rem;">
+                    Update
+                </button>
+            </td>
+        `;
+        tbody.appendChild(row);
+    });
+}
+
+function loadAnalyticsCharts() {
+    // Patient Flow Chart
+    const patientFlowCtx = document.getElementById('patientFlowChart');
+    if (patientFlowCtx) {
+        new Chart(patientFlowCtx, {
+            type: 'line',
+            data: {
+                labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                datasets: [{
+                    label: 'Patient Flow',
+                    data: [65, 78, 90, 81, 96, 85, 70],
+                    borderColor: '#017b9a',
+                    backgroundColor: '#017b9a33',
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: false }
+                }
+            }
+        });
+    }
+    
+    // Department Performance Chart
+    const departmentCtx = document.getElementById('departmentChart');
+    if (departmentCtx) {
+        new Chart(departmentCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Emergency', 'Cardiology', 'Pediatrics', 'Orthopedics', 'General'],
+                datasets: [{
+                    data: [25, 20, 18, 22, 15],
+                    backgroundColor: [
+                        '#e74c3c',
+                        '#3498db',
+                        '#2ecc71',
+                        '#f39c12',
+                        '#9b59b6'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+    }
+}
+
+function calculateAge(dob) {
+    const birthDate = new Date(dob);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const m = today.getMonth() - birthDate.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+    }
+    return age;
+}
+
+function viewPatientDetails(patientId) {
+    const patients = JSON.parse(localStorage.getItem('patients') || '[]');
+    const patient = patients.find(p => p.id === patientId);
+    if (patient) {
+        showToast(`Viewing details for ${patient.firstName} ${patient.lastName}`, 'info');
+        // You can open a detailed view modal here
+    }
+}
+
+function viewDoctorDetails(doctorId) {
+    const doctors = JSON.parse(localStorage.getItem('doctors') || '[]');
+    const doctor = doctors.find(d => d.id === doctorId);
+    if (doctor) {
+        showToast(`Viewing details for Dr. ${doctor.name}`, 'info');
+        // You can open a detailed view modal here
+    }
+}
+
+function updateAppointmentStatus(appointmentId) {
+    const appointments = JSON.parse(localStorage.getItem('appointments') || '[]');
+    const appointment = appointments.find(a => a.id === appointmentId);
+    if (appointment) {
+        appointment.status = appointment.status === 'Scheduled' ? 'Completed' : 'Scheduled';
+        localStorage.setItem('appointments', JSON.stringify(appointments));
+        loadAppointmentsData();
+        showToast('Appointment status updated!', 'success');
+    }
+}
+
+function filterAppointments() {
+    const dateFilter = document.getElementById('adminDateFilter').value;
+    if (dateFilter) {
+        showToast(`Filtering appointments for ${dateFilter}`, 'info');
+        loadAppointmentsData();
+    }
+}
+
+// ==================== NOTIFICATION MANAGER ====================
+const notificationManager = {
+    permission: false,
+    
+    requestPermission: function() {
+        if ('Notification' in window) {
+            Notification.requestPermission().then(permission => {
+                this.permission = permission === 'granted';
+            });
+        }
+    },
+    
+    showNotification: function(title, body, icon = '/favicon.ico') {
+        if (this.permission && 'Notification' in window) {
+            const notification = new Notification(title, {
+                body: body,
+                icon: icon,
+                tag: 'healthnest-notification'
+            });
+            
+            setTimeout(() => {
+                notification.close();
+            }, 5000);
+        } else {
+            // Fallback to toast notification
+            showToast(`${title}: ${body}`, 'info');
+        }
+    }
+};
+
+// ==================== ENHANCED QUEUE MANAGEMENT ====================
 const queueSystem = {
     tokens: ['A001', 'A002', 'A003', 'A004', 'A005'],
     currentToken: 'A001',
     userToken: null,
     crowdLevel: 45,
+    emergencyQueue: [],
+    priorityQueue: [],
+    
     init: function() {
         this.updateQueueDisplay();
         this.startCrowdMonitoring();
+        this.startTokenProgression();
         setInterval(() => this.simulateQueueProgress(), 5000);
     },
-    generateToken: function() {
+    
+    generateToken: function(priority = 'normal') {
         const nextNum = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-        this.userToken = 'A' + nextNum;
+        let prefix = 'A';
+        
+        if (priority === 'emergency') {
+            prefix = 'E';
+            this.emergencyQueue.push(prefix + nextNum);
+        } else if (priority === 'priority') {
+            prefix = 'P';
+            this.priorityQueue.push(prefix + nextNum);
+        }
+        
+        this.userToken = prefix + nextNum;
         return this.userToken;
     },
+    
     updateQueueDisplay: function() {
         const tokenEl = document.getElementById('queueToken');
         const posEl = document.getElementById('queuePosition');
@@ -571,16 +1124,41 @@ const queueSystem = {
         
         if (tokenEl && this.userToken) {
             tokenEl.textContent = this.userToken;
-            const position = this.tokens.indexOf(this.userToken) + 1 || Math.floor(Math.random() * 10) + 5;
+            
+            // Calculate position based on queue type
+            let position = 0;
+            if (this.userToken.startsWith('E')) {
+                position = this.emergencyQueue.indexOf(this.userToken) + 1;
+            } else if (this.userToken.startsWith('P')) {
+                position = this.priorityQueue.indexOf(this.userToken) + 1 + this.emergencyQueue.length;
+            } else {
+                position = this.tokens.indexOf(this.userToken) + 1 || Math.floor(Math.random() * 10) + 5;
+            }
+            
             posEl.textContent = position;
             waitEl.textContent = (position * 10) + ' minutes';
         }
     },
+    
     simulateQueueProgress: function() {
         const tokens = ['A001', 'A002', 'A003', 'A004'];
         const randomToken = tokens[Math.floor(Math.random() * tokens.length)];
         document.getElementById('currentToken').textContent = randomToken;
+        
+        // Update next tokens list
+        const nextTokensList = document.getElementById('nextTokensList');
+        if (nextTokensList) {
+            const nextTokens = this.getNextTokens(5);
+            nextTokensList.innerHTML = nextTokens.map(token => `<li>${token}</li>`).join('');
+        }
     },
+    
+    getNextTokens: function(count) {
+        const allTokens = [...this.emergencyQueue, ...this.priorityQueue, ...this.tokens];
+        const currentIndex = allTokens.indexOf(this.currentToken);
+        return allTokens.slice(currentIndex + 1, currentIndex + 1 + count);
+    },
+    
     startCrowdMonitoring: function() {
         setInterval(() => {
             this.crowdLevel = Math.max(20, Math.min(95, this.crowdLevel + (Math.random() - 0.5) * 10));
@@ -590,274 +1168,319 @@ const queueSystem = {
                 crowdFill.style.width = this.crowdLevel + '%';
                 crowdPercent.textContent = Math.round(this.crowdLevel);
             }
+            
+            // Alert if crowd is too high
+            if (this.crowdLevel > 80) {
+                notificationManager.showNotification(
+                    'High Crowd Alert',
+                    `Hospital occupancy is at ${Math.round(this.crowdLevel)}%. Consider arriving later if possible.`
+                );
+            }
         }, 3000);
+    },
+    
+    startTokenProgression: function() {
+        setInterval(() => {
+            // Move to next token
+            const allTokens = [...this.emergencyQueue, ...this.priorityQueue, ...this.tokens];
+            const currentIndex = allTokens.indexOf(this.currentToken);
+            
+            if (currentIndex < allTokens.length - 1) {
+                this.currentToken = allTokens[currentIndex + 1];
+            } else {
+                this.currentToken = allTokens[0]; // Reset to first
+            }
+            
+            document.getElementById('currentToken').textContent = this.currentToken;
+            this.updateQueueDisplay();
+        }, 10000); // Change token every 10 seconds for demo
     }
 };
 
-// --- DOCTOR AVAILABILITY TRACKING ---
+// ==================== DOCTOR AVAILABILITY TRACKING ====================
 const doctors = [
-    { id: 'dr-gupta', name: 'Dr. Rajesh Gupta', specialty: 'General Physician', status: 'available', rating: 4.8 },
-    { id: 'dr-sharma', name: 'Dr. Priya Sharma', specialty: 'Cardiologist', status: 'busy', rating: 4.9 },
-    { id: 'dr-patel', name: 'Dr. Amit Patel', specialty: 'Dentist', status: 'available', rating: 4.7 },
-    { id: 'dr-khan', name: 'Dr. Sarah Khan', specialty: 'Pediatrician', status: 'offline', rating: 4.6 }
+    {
+        id: 'dr-gupta',
+        name: 'Dr. Rajesh Gupta',
+        specialization: 'General Physician',
+        status: 'available',
+        patientsToday: 8,
+        maxPatients: 20,
+        nextAvailable: '2:30 PM',
+        rating: 4.8,
+        experience: '15 years'
+    },
+    {
+        id: 'dr-sharma',
+        name: 'Dr. Priya Sharma',
+        specialization: 'Cardiologist',
+        status: 'busy',
+        patientsToday: 12,
+        maxPatients: 15,
+        nextAvailable: '4:00 PM',
+        rating: 4.9,
+        experience: '12 years'
+    },
+    {
+        id: 'dr-patel',
+        name: 'Dr. Amit Patel',
+        specialization: 'Dentist',
+        status: 'available',
+        patientsToday: 5,
+        maxPatients: 16,
+        nextAvailable: '3:00 PM',
+        rating: 4.7,
+        experience: '8 years'
+    }
 ];
 
 function initializeDoctorAvailability() {
-    const grid = document.getElementById('doctorsGrid');
-    if (!grid) return;
-    grid.innerHTML = '';
+    const doctorsGrid = document.getElementById('doctorsGrid');
+    if (!doctorsGrid) return;
     
-    doctors.forEach(doc => {
-        const card = document.createElement('div');
-        card.className = 'doctor-card';
-        const statusClass = doc.status === 'available' ? 'available' : doc.status === 'busy' ? 'busy' : 'offline';
-        card.innerHTML = `
-            <div class="doctor-avatar">👨‍⚕️</div>
-            <div class="doctor-name">${doc.name}</div>
-            <div class="doctor-specialty">${doc.specialty}</div>
-            <div class="availability-status ${statusClass}">${doc.status.charAt(0).toUpperCase() + doc.status.slice(1)}</div>
-            <div style="font-size: 0.9rem; color: var(--on-surface-variant);">⭐ ${doc.rating}</div>
-            <button class="cta-button" style="margin-top: 1rem; width: 100%;" onclick="openModal('appointmentModal')" ${doc.status === 'offline' ? 'disabled' : ''}>Book Now</button>
-        `;
-        grid.appendChild(card);
-    });
-}
-
-// --- APPOINTMENT SYSTEM ---
-let appointments = [
-    { id: 1, doctor: 'Dr. Gupta', date: '2025-02-15', time: '10:00 AM', reason: 'Checkup', status: 'confirmed' },
-    { id: 2, doctor: 'Dr. Sharma', date: '2025-02-20', time: '2:00 PM', reason: 'Heart checkup', status: 'confirmed' }
-];
-
-function handleAppointmentBooking(event) {
-    event.preventDefault();
-    const doctor = document.getElementById('doctorSelect').value;
-    const date = document.getElementById('appointmentDate').value;
-    const timeSlots = document.querySelectorAll('.time-slot.selected');
+    doctorsGrid.innerHTML = '';
     
-    if (timeSlots.length === 0) {
-        showToast('Please select a time slot', 'error');
-        return;
-    }
-    
-    const time = timeSlots[0].textContent;
-    const reason = event.target.querySelector('textarea').value;
-    
-    const appointment = {
-        id: appointments.length + 1,
-        doctor: document.querySelector('#doctorSelect option:checked').textContent,
-        date: date,
-        time: time,
-        reason: reason,
-        status: 'confirmed'
-    };
-    
-    appointments.push(appointment);
-    displayAppointments();
-    showToast('Appointment booked successfully! Your token: ' + queueSystem.generateToken(), 'success');
-    queueSystem.updateQueueDisplay();
-    closeModal('appointmentModal');
-}
-
-function displayAppointments() {
-    const container = document.getElementById('appointmentCardsContainer');
-    if (!container) return;
-    container.innerHTML = '';
-    
-    appointments.forEach(apt => {
-        const card = document.createElement('div');
-        card.className = 'appointment-card';
-        card.innerHTML = `
-            <h4>${apt.doctor}</h4>
-            <div class="appointment-details">
-                <p><strong>Date:</strong> ${new Date(apt.date).toLocaleDateString()}</p>
-                <p><strong>Time:</strong> ${apt.time}</p>
-                <p><strong>Reason:</strong> ${apt.reason}</p>
-                <p><strong>Status:</strong> <span style="color: #2ecc71;">${apt.status}</span></p>
+    doctors.forEach(doctor => {
+        const doctorCard = document.createElement('div');
+        doctorCard.className = 'doctor-card';
+        
+        const statusClass = doctor.status === 'available' ? 'available' : 
+                           doctor.status === 'busy' ? 'busy' : 'offline';
+        
+        const availabilityPercentage = (doctor.patientsToday / doctor.maxPatients) * 100;
+        
+        doctorCard.innerHTML = `
+            <div class="doctor-avatar">
+                <i class="fas fa-user-md"></i>
             </div>
-            <button class="cta-button" style="width: 100%; margin-top: 1rem;" onclick="cancelAppointment(${apt.id})">Cancel</button>
+            <div class="doctor-name">${doctor.name}</div>
+            <div class="doctor-specialty">${doctor.specialization}</div>
+            <div class="availability-status ${statusClass}">${doctor.status.toUpperCase()}</div>
+            <div class="doctor-stats">
+                <p><strong>Experience:</strong> ${doctor.experience}</p>
+                <p><strong>Rating:</strong> ⭐ ${doctor.rating}</p>
+                <p><strong>Patients Today:</strong> ${doctor.patientsToday}/${doctor.maxPatients}</p>
+                <p><strong>Next Available:</strong> ${doctor.nextAvailable}</p>
+            </div>
+            <div class="availability-bar">
+                <div class="availability-fill" style="width: ${availabilityPercentage}%"></div>
+            </div>
+            <button class="cta-button" onclick="bookWithDoctor('${doctor.id}')" style="margin-top: 1rem; width: 100%;">
+                Book Appointment
+            </button>
         `;
-        container.appendChild(card);
+        
+        doctorsGrid.appendChild(doctorCard);
     });
 }
 
-function cancelAppointment(id) {
-    appointments = appointments.filter(apt => apt.id !== id);
-    displayAppointments();
-    showToast('Appointment cancelled', 'info');
-}
-
-function generateTimeSlots(selectedDate) {
-    const slotsContainer = document.getElementById('timeSlots');
-    if (!slotsContainer) return;
-    
-    const times = ['09:00 AM', '10:00 AM', '11:00 AM', '12:00 PM', '02:00 PM', '03:00 PM', '04:00 PM', '05:00 PM'];
-    slotsContainer.innerHTML = '';
-    
-    times.forEach(time => {
-        const slot = document.createElement('div');
-        slot.className = 'time-slot';
-        slot.textContent = time;
-        slot.onclick = function() {
-            document.querySelectorAll('.time-slot').forEach(s => s.classList.remove('selected'));
-            this.classList.add('selected');
-        };
-        slotsContainer.appendChild(slot);
-    });
-}
-
-// --- PATIENT REGISTRATION ---
-function handlePatientRegistration(event) {
-    event.preventDefault();
-    const formData = new FormData(event.target);
-    showToast('Patient registration completed successfully!', 'success');
-    closeModal('patientRegistrationModal');
-    displayAppointments();
-}
-
-// --- EMERGENCY ALERT SYSTEM ---
-function handleEmergencyAlert(event) {
-    event.preventDefault();
-    const emergencyType = event.target.querySelector('select').value;
-    const description = event.target.querySelector('textarea').value;
-    
-    showToast('🚨 EMERGENCY ALERT SENT to Hospital! Ambulance will arrive soon.', 'success');
-    
-    // Simulate emergency notification
-    console.log('Emergency Alert:', { type: emergencyType, description: description, timestamp: new Date() });
-    
-    closeModal('emergencyAlertModal');
-}
-
-// --- ADMIN DASHBOARD ---
-function openAdminDashboard() {
-    const isAdmin = confirm('Are you an admin? (This is a demo)');
-    if (isAdmin) {
-        document.getElementById('adminLink').style.display = 'inline-flex';
-        openModal('adminModal');
-        switchAdminTab('users');
-    } else {
-        showToast('Admin access denied', 'error');
+function bookWithDoctor(doctorId) {
+    const doctor = doctors.find(d => d.id === doctorId);
+    if (doctor) {
+        openModal('appointmentModal');
+        
+        // Pre-select the doctor
+        setTimeout(() => {
+            const doctorSelect = document.getElementById('doctorSelect');
+            if (doctorSelect) {
+                doctorSelect.value = doctorId;
+            }
+        }, 100);
+        
+        showToast(`Selected ${doctor.name}`, 'info');
     }
 }
 
-function switchAdminTab(tab) {
-    const buttons = document.querySelectorAll('.admin-tab-btn');
-    buttons.forEach(btn => btn.classList.remove('active'));
-    event.target.classList.add('active');
-    
-    const content = document.getElementById('adminContent');
-    let html = '';
-    
-    switch(tab) {
-        case 'users':
-            html = `<h3>Registered Users</h3>
-                    <table class="admin-table">
-                        <tr><th>User ID</th><th>Name</th><th>Email</th><th>Status</th><th>Action</th></tr>
-                        <tr><td>U001</td><td>Ayush Harinkhere</td><td>ayush@email.com</td><td>Active</td><td><button class="cta-button">View</button></td></tr>
-                        <tr><td>U002</td><td>John Doe</td><td>john@email.com</td><td>Active</td><td><button class="cta-button">View</button></td></tr>
-                        <tr><td>U003</td><td>Jane Smith</td><td>jane@email.com</td><td>Inactive</td><td><button class="cta-button">View</button></td></tr>
-                    </table>`;
-            break;
-        case 'doctors':
-            html = `<h3>Doctor Management</h3>
-                    <table class="admin-table">
-                        <tr><th>Doctor ID</th><th>Name</th><th>Specialty</th><th>Status</th><th>Action</th></tr>
-                        <tr><td>D001</td><td>Dr. Rajesh Gupta</td><td>General Physician</td><td>Available</td><td><button class="cta-button">Edit</button></td></tr>
-                        <tr><td>D002</td><td>Dr. Priya Sharma</td><td>Cardiologist</td><td>Busy</td><td><button class="cta-button">Edit</button></td></tr>
-                    </table>`;
-            break;
-        case 'appointments':
-            html = `<h3>All Appointments</h3>
-                    <table class="admin-table">
-                        <tr><th>Apt ID</th><th>Patient</th><th>Doctor</th><th>Date</th><th>Status</th></tr>
-                        <tr><td>APT001</td><td>Ayush H.</td><td>Dr. Gupta</td><td>2025-02-15</td><td>Confirmed</td></tr>
-                        <tr><td>APT002</td><td>John Doe</td><td>Dr. Sharma</td><td>2025-02-20</td><td>Confirmed</td></tr>
-                    </table>`;
-            break;
-        case 'queue':
-            html = `<h3>Current Queue Status</h3>
-                    <div style="padding: 1rem; background: var(--primary-container); border-radius: var(--border-radius-medium);">
-                        <p><strong>Total in Queue:</strong> 23</p>
-                        <p><strong>Currently Serving:</strong> A001</p>
-                        <p><strong>Average Wait Time:</strong> 15 minutes</p>
-                    </div>`;
-            break;
-        case 'crowd':
-            html = `<h3>Hospital Crowd Monitor</h3>
-                    <div style="padding: 1rem;">
-                        <p><strong>Current Occupancy:</strong> <span id="crowdPercent">45</span>%</p>
-                        <div class="crowd-bar" style="height: 2rem; margin: 1rem 0;">
-                            <div class="crowd-fill" id="crowdMonitor" style="width: 45%; height: 100%;"></div>
-                        </div>
-                        <p><strong>Capacity:</strong> 200 beds | <strong>Occupied:</strong> 90 beds</p>
-                    </div>`;
-            break;
-    }
-    
-    content.innerHTML = html;
+// Real-time status updates
+function startRealTimeUpdates() {
+    setInterval(() => {
+        doctors.forEach(doctor => {
+            // Randomly update doctor status
+            const random = Math.random();
+            if (random < 0.1) {
+                doctor.status = doctor.status === 'available' ? 'busy' : 'available';
+            }
+            
+            // Randomly increment patients
+            if (random < 0.05 && doctor.patientsToday < doctor.maxPatients) {
+                doctor.patientsToday++;
+            }
+        });
+        
+        initializeDoctorAvailability();
+    }, 30000); // Update every 30 seconds
 }
 
-// --- REAL-TIME NOTIFICATIONS ---
-class NotificationManager {
-    constructor() {
-        this.notifications = [];
-    }
+// ==================== AI HOSPITAL CROWD MONITOR ====================
+const crowdMonitor = {
+    init: function() {
+        this.startMonitoring();
+        this.initializePredictions();
+    },
     
-    sendNotification(title, message, type = 'info') {
-        if ('Notification' in window && Notification.permission === 'granted') {
-            new Notification(title, {
-                body: message,
-                icon: '💚'
-            });
+    startMonitoring: function() {
+        setInterval(() => {
+            this.analyzeCrowdPatterns();
+            this.updatePredictions();
+        }, 60000); // Update every minute
+    },
+    
+    analyzeCrowdPatterns: function() {
+        const currentHour = new Date().getHours();
+        const currentDay = new Date().getDay();
+        
+        // Simulate crowd analysis based on time and day
+        let expectedCrowd = 50;
+        
+        // Peak hours: 9-11 AM and 4-6 PM
+        if ((currentHour >= 9 && currentHour <= 11) || (currentHour >= 16 && currentHour <= 18)) {
+            expectedCrowd = 80;
         }
-        showToast(`${title}: ${message}`, type);
-    }
+        
+        // Weekends are busier
+        if (currentDay === 0 || currentDay === 6) {
+            expectedCrowd += 15;
+        }
+        
+        // Update queue system with predicted crowd
+        queueSystem.crowdLevel = Math.min(95, expectedCrowd + (Math.random() - 0.5) * 20);
+    },
     
-    requestPermission() {
-        if ('Notification' in window && Notification.permission === 'default') {
-            Notification.requestPermission();
+    initializePredictions: function() {
+        // AI-powered crowd predictions
+        this.predictNextHourCrowd();
+        this.predictBestVisitTime();
+    },
+    
+    predictNextHourCrowd: function() {
+        const nextHour = new Date().getHours() + 1;
+        let prediction = 50;
+        
+        if (nextHour >= 9 && nextHour <= 11) prediction = 85;
+        if (nextHour >= 16 && nextHour <= 18) prediction = 80;
+        
+        return prediction;
+    },
+    
+    predictBestVisitTime: function() {
+        const currentHour = new Date().getHours();
+        let bestTime = '';
+        
+        if (currentHour < 9) bestTime = '9:00 AM - 10:00 AM';
+        else if (currentHour < 12) bestTime = '2:00 PM - 3:00 PM';
+        else if (currentHour < 16) bestTime = '4:00 PM - 5:00 PM';
+        else bestTime = 'Tomorrow 9:00 AM';
+        
+        return bestTime;
+    },
+    
+    updatePredictions: function() {
+        const prediction = this.predictNextHourCrowd();
+        const bestTime = this.predictBestVisitTime();
+        
+        // Update UI with predictions
+        const predictionElement = document.getElementById('crowdPrediction');
+        if (predictionElement) {
+            predictionElement.innerHTML = `
+                <p><strong>Next Hour Prediction:</strong> ${prediction}% occupancy</p>
+                <p><strong>Best Time to Visit:</strong> ${bestTime}</p>
+            `;
         }
     }
+};
+
+// ==================== ENHANCED PROFILE WITH MORE FIELDS ====================
+function enhanceProfileModal() {
+    const editProfileModal = document.getElementById('editProfileModal');
+    if (!editProfileModal) return;
+    
+    // Add more fields to the existing profile modal
+    const additionalFields = `
+        <div class="form-grid">
+            <div>
+                <label for="editBloodGroup">Blood Group</label>
+                <select id="editBloodGroup" class="modal-select">
+                    <option value="">Select Blood Group</option>
+                    <option value="A+">A+</option>
+                    <option value="A-">A-</option>
+                    <option value="B+">B+</option>
+                    <option value="B-">B-</option>
+                    <option value="AB+">AB+</option>
+                    <option value="AB-">AB-</option>
+                    <option value="O+">O+</option>
+                    <option value="O-">O-</option>
+                </select>
+            </div>
+            <div>
+                <label for="editPhone">Phone Number</label>
+                <input type="tel" id="editPhone" class="modal-input" placeholder="+91 98765 43210">
+            </div>
+        </div>
+        
+        <div class="form-grid">
+            <div>
+                <label for="editEmergencyContact">Emergency Contact</label>
+                <input type="tel" id="editEmergencyContact" class="modal-input" placeholder="Emergency contact number">
+            </div>
+            <div>
+                <label for="editAllergies">Known Allergies</label>
+                <input type="text" id="editAllergies" class="modal-input" placeholder="e.g., Penicillin, Peanuts">
+            </div>
+        </div>
+        
+        <label for="editAddress">Address</label>
+        <textarea id="editAddress" class="modal-input" rows="2" placeholder="Full residential address"></textarea>
+        
+        <div class="form-grid">
+            <div>
+                <label for="editInsurance">Insurance Provider</label>
+                <input type="text" id="editInsurance" class="modal-input" placeholder="Insurance company name">
+            </div>
+            <div>
+                <label for="editPolicyNumber">Policy Number</label>
+                <input type="text" id="editPolicyNumber" class="modal-input" placeholder="Insurance policy number">
+            </div>
+        </div>
+        
+        <div class="form-grid">
+            <div>
+                <label for="editMaritalStatus">Marital Status</label>
+                <select id="editMaritalStatus" class="modal-select">
+                    <option value="">Select Status</option>
+                    <option value="Single">Single</option>
+                    <option value="Married">Married</option>
+                    <option value="Divorced">Divorced</option>
+                    <option value="Widowed">Widowed</option>
+                </select>
+            </div>
+            <div>
+                <label for="editOccupation">Occupation</label>
+                <input type="text" id="editOccupation" class="modal-input" placeholder="Your occupation">
+            </div>
+        </div>
+        
+        <label for="editMedicalHistory">Medical History</label>
+        <textarea id="editMedicalHistory" class="modal-input" rows="3" placeholder="Previous medical conditions, surgeries, etc."></textarea>
+    `;
+    
+    // Insert additional fields before the save button
+    const saveButton = editProfileModal.querySelector('button[onclick="saveProfile()"]');
+    if (saveButton) {
+        saveButton.insertAdjacentHTML('beforebegin', additionalFields);
+    }
 }
 
-const notificationManager = new NotificationManager();
-
-// --- AI MULTILINGUAL HELPDESK ---
-function enhanceAIChat() {
-    // Add multilingual support
-    const languages = ['en', 'hi', 'es', 'fr'];
-    const currentLang = document.documentElement.lang || 'en';
+// Initialize enhanced profile when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    // Existing initialization code...
     
-    // This can be expanded with actual translation APIs
-    const helpTopics = {
-        'appointments': 'How to book an appointment',
-        'emergency': 'Emergency services',
-        'queue': 'Queue management system',
-        'doctor_availability': 'Check doctor availability',
-        'prescriptions': 'View prescriptions',
-        'test_results': 'Check test results'
-    };
+    // Enhance profile modal with additional fields
+    enhanceProfileModal();
     
-    return helpTopics;
-}
-{/* <script type="module">
-  // Import the functions you need from the SDKs you need
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
-  // TODO: Add SDKs for Firebase products that you want to use
-  // https://firebase.google.com/docs/web/setup#available-libraries
-
-  // Your web app's Firebase configuration
-  const firebaseConfig = {
-    apiKey: "AIzaSyBh_Oe8jtUv4XUn2EjKNbAA9nSOIJ26xBo",
-    authDomain: "health-nest.firebaseapp.com",
-    projectId: "health-nest",
-    storageBucket: "health-nest.firebasestorage.app",
-    messagingSenderId: "828344669402",
-    appId: "1:828344669402:web:958080d8fc7bffc93541e3"
-  };
-
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
-</script> */}
+    // Initialize crowd monitor
+    crowdMonitor.init();
+    
+    // Start real-time updates
+    startRealTimeUpdates();
+});
 
