@@ -1,6 +1,6 @@
 /**
  * VANI - Health AI Assistant for HealthNest
- * Smart conversational AI built for healthcare support
+ * Smart conversational AI built for healthcare support 
  */
 
 function getAIResponse(userMessage) {
