@@ -2,7 +2,7 @@
  * VANI - Health AI Assistant for HealthNest
  * Smart conversational AI built for healthcare support 
  */
-
+ 
 function getAIResponse(userMessage) {
     const userMessageLower = userMessage.toLowerCase().trim();
     const hour = new Date().getHours();
