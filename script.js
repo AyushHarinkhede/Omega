@@ -2,7 +2,7 @@
     let healthChartInstance = null;
     let newProfilePicSrc = null; // To hold the new picture URL temporarily
     
-    const languageData = {
+    const languageData = { 
         hi: {
             navHome: "होम", navDashboard: "डैशबोर्ड", featuresTitle: "विशेषताएँ", faqTitle: "FAQ", navSignUp: "साइन अप", navLogIn: "लॉग इन",
             settingsTitle: "सेटिंग्स", settingsTheme: "थीम", settingsTextSize: "वेबसाइट साइज", settingsLanguage: "भाषा", settingsAccount: "अकाउंट", settingsUpdate: "अपडेट", settingsNotifications: "नोटिफिकेशन्स", settingsPrivacy: "प्राइवेसी", settingsSecurity: "सिक्योरिटी", settingsStorage: "डाटा और स्टोरेज", settingsClear: "स्टोरेज साफ़ करें", settingsSupport: "हेल्प और सपोर्ट", settingsContactSupport: "सपोर्ट से संपर्क करें",
