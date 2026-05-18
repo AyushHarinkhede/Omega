@@ -1,4 +1,4 @@
-    // --- GLOBAL VARIABLES ---
+    // --- GLOBAL  VARIABLES ---
     let healthChartInstance = null;
     let newProfilePicSrc = null; // To hold the new picture URL temporarily
     
